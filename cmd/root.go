@@ -11,13 +11,12 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "dcr",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "CLI tool for clean room service",
+	Long: `This tool is used to orchestrate clean room service given collaboration package.
+	A data clean room is a secure environment where organizations can collect data from multiple 
+	sources and combine it with their first-party data. Doing so allows marketers to leverage large,
+	aggregated datasets of consumer behavior to provide insight into critical factors like performance,
+	demographics, campaigns, etc.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
