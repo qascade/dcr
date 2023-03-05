@@ -1,6 +1,5 @@
 /*
 Copyright © 2023 dcr
-
 */
 package main
 
