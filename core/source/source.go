@@ -1,1 +1,3 @@
-package source 
+package source
+
+type SourceWarehouse interface{}

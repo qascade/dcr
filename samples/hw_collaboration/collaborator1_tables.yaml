@@ -1,3 +1,4 @@
+name: Airline
 tables: 
 	- name: customer_identifies 
 		database: sales

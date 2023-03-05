@@ -1,4 +1,4 @@
-
+name: AdSense
 tables: 
 	- name: Client_Network
 		database: Adsense_DB
