@@ -14,7 +14,7 @@ on:
 jobs:
   main:
     name: Validate PR title
-    permissions: read|write
+    permissions: read-all
     runs-on: ubuntu-latest
     steps:
       -
