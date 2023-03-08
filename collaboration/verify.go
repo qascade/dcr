@@ -46,7 +46,7 @@ func GetContractFromRepo(link string) (*string, *error) {
 }
 
 func Verify(path string) error {
-	err := godotenv.Load(".env")
+	err := godotenv.Load("../.env")
 	if err != nil {
 		err = errors.New("error loading environment variables file")
 		return err
@@ -65,12 +65,6 @@ func Verify(path string) error {
 		gitRepos[i] = cSpec.Collaborators[i].GitRepo
 	}
 
-	for i := 0; i < noOfCollaborators; i++ {
-		Upload(path+"/contract.yaml", gitRepos[i])
-	}
-
-	log.Println("Repos initialised and successfully uploaded")
-
 	var currContractContent *string
 	for i := 0; i < noOfCollaborators; i++ {
 		if i == 0 {
@@ -85,18 +79,12 @@ func Verify(path string) error {
 	}
 	log.Println("Contracts verified successfully")
 
-	for i := 0; i < noOfCollaborators; i++ {
-		Delete(gitRepos[i])
-	}
-
-	log.Println("Repos successfully deleted")
-
 	return nil
 }
 
 func Upload(linkToContractFile string, RepoName string) error {
 
-	err := godotenv.Load(".env")
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Printf("Error loading environment variables file")
 		return errors.New("Error loading environment variables file")
@@ -158,7 +146,7 @@ func Upload(linkToContractFile string, RepoName string) error {
 
 func Delete(repoName string) error {
 
-	err := godotenv.Load(".env")
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Printf("Error loading environment variables file")
 		return errors.New("Error loading environment variables file")

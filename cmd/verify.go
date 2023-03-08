@@ -14,7 +14,7 @@ var verifyCmd = &cobra.Command{
 	Short: "Verifies if the parties in business have mutually agreed upon the same rules",
 	Long:  `A cli tool to compare the contracts. The required parameter is the path where the contract.yaml is present`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run called")
+		fmt.Println("Verify called")
 	},
 }
 
