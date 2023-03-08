@@ -52,7 +52,7 @@ func Verify(path string) error {
 		return err
 	}
 
-	var collabPkg CollaborationParser = &CollaborationPackage{}
+	var collabPkg Collaboration = &CollaborationPackage{}
 	cSpec, _, err := collabPkg.Parse(path)
 	if err != nil {
 		return errors.New("error parsing contract.yaml file")
@@ -87,7 +87,7 @@ func Upload(linkToContractFile string, RepoName string) error {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Printf("Error loading environment variables file")
-		return errors.New("Error loading environment variables file")
+		return errors.New("error loading environment variables file")
 	}
 
 	ctx := context.Background()
@@ -107,7 +107,7 @@ func Upload(linkToContractFile string, RepoName string) error {
 	})
 	if err != nil {
 		log.Printf("Failed to create repo: %v\n", err)
-		return errors.New("Failed to create repo.")
+		return errors.New("failed to create repo")
 	}
 
 	log.Printf("Created new repo: %v\n", *repo.HTMLURL)
@@ -149,7 +149,7 @@ func Delete(repoName string) error {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Printf("Error loading environment variables file")
-		return errors.New("Error loading environment variables file")
+		return errors.New("error loading environment variables file")
 	}
 
 	owner := os.Getenv("owner")
