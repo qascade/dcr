@@ -1,7 +1,6 @@
 package collaboration
 
 import (
-	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/qascade/dcr/collaboration/contract"
+	"github.com/qascade/dcr/collaboration/utils"
 )
 
 // Collaboration Package structure
@@ -23,7 +23,7 @@ type CollaborationPackage struct {
 }
 
 // A Type of Collaboration Package must implement CollaborationParser interface
-type CollaborationParser interface {
+type Collaboration interface {
 	Parse(path string) (*contract.ContractSpec, *[]contract.TablesContractSpec, error)
 }
 
@@ -99,27 +99,21 @@ func ParseSpec(fileYaml []byte, specType contract.SpecType) (contract.Spec, erro
 	} else {
 		bs = contract.TablesContractSpec{}
 	}
-	err := UnmarshalStrict(fileYaml, &bs)
+
+	err := utils.UnmarshalStrict(fileYaml, &bs)
 	if err != nil {
 		var bs2 contract.Spec
 		err2 := yaml.Unmarshal(fileYaml, &bs2)
 		if err2 != nil {
 			return bs, fmt.Errorf("error parsing yaml: %w", err2)
 		}
-		partialBuildSpecYaml, err3 := yaml.Marshal(bs2)
+		partialSpecYaml, err3 := yaml.Marshal(bs2)
 		if err3 != nil {
 			return bs, fmt.Errorf("error marshaling partial build spec: %w", err3)
 		}
-		return bs, fmt.Errorf(
-			"error parsing yaml.  Parse result:\n%s\nParse error:%s",
-			partialBuildSpecYaml,
-			err)
+		return bs, fmt.Errorf("error parsing yaml.  Parse result:\n%s\nParse error:%s", partialSpecYaml, err)
 	}
 	return bs, err
 }
 
-func UnmarshalStrict(in []byte, out interface{}) (err error) {
-	knownFieldsDecoder := yaml.NewDecoder(bytes.NewReader(in))
-	knownFieldsDecoder.KnownFields(true)
-	return knownFieldsDecoder.Decode(out)
-}
+

@@ -27,15 +27,15 @@ func TestContract(t *testing.T) {
 }
 
 func testParsing(t *testing.T, testStruct testPackage) {
-	var collabPkg collab.CollaborationParser = &collab.CollaborationPackage{}
+	var collabPkg collab.Collaboration = &collab.CollaborationPackage{}
 	cSpec, tSpecs, err := collabPkg.Parse(testStruct.path)
 	require.NoError(t, err)
 	fmt.Println(cSpec)
 	fmt.Println()
 	for _, tSpec := range *tSpecs {
 		fmt.Println(tSpec)
-		fmt.Println()
 	}
 	require.NotNil(t, cSpec)
 	require.NotNil(t, tSpecs)
 }
+
