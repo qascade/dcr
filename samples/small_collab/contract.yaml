@@ -3,7 +3,7 @@ version: 0.1
 Purpose: Attribution of XYZ Flight Ticket. 
 collaborators: 
   - name: Airline
-    contract_repo: repo_link1
+    contract_repo: "example1"
     user_agents: 
       - name: John 
         email: john@gmail.com 
@@ -12,7 +12,7 @@ collaborators:
     warehouse: 
     - name: snowflake 
   - name: AdSense
-    contract_repo: repo_link2
+    contract_repo: "example2"
     user_agents: 
       - name: Hammond
         email: hammond@gmail.com 
