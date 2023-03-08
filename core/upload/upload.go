@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"io/ioutil"
-	"github.com/joho/godotenv"
+	"os"
+
 	"github.com/google/go-github/v39/github"
+	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 )
 
@@ -41,34 +42,32 @@ func main() {
 	fmt.Printf("Created new repo: %v\n", *repo.HTMLURL)
 
 	owner := os.Getenv("owner")
-    repoT := "examplei"
-    filePath := "example.txt"
+	repoT := "examplei"
+	filePath := "example.txt"
 
-    data, err := ioutil.ReadFile(filePath)
-    if err != nil {
-        fmt.Println(err)
-        os.Exit(1)
-    }
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-    fileOptions := &github.RepositoryContentFileOptions{
-        Message:   github.String("Add example file"),
-        Content:   data,
-    }
+	fileOptions := &github.RepositoryContentFileOptions{
+		Message: github.String("Add example file"),
+		Content: data,
+	}
 
-    _, _, err = client.Repositories.CreateFile(
-        context.Background(),
-        owner,
-        repoT,
-        filePath,
-        fileOptions,
-    )
-    if err != nil {
-        fmt.Println(err)
-        os.Exit(1)
-    }
+	_, _, err = client.Repositories.CreateFile(
+		context.Background(),
+		owner,
+		repoT,
+		filePath,
+		fileOptions,
+	)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-    fmt.Println("File uploaded successfully")
-
-	
+	fmt.Println("File uploaded successfully")
 
 }

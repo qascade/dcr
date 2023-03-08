@@ -1,36 +1,37 @@
 package main
 
 import (
-    "fmt"
-    "flag"
 	"context"
-    "io/ioutil"
-    "gopkg.in/yaml.v2"
-	"github.com/joho/godotenv"
-	"github.com/google/go-github/v35/github"
-	"golang.org/x/oauth2"
+	"flag"
+	"fmt"
+	"io/ioutil"
 	"os"
+
+	"github.com/google/go-github/v35/github"
+	"github.com/joho/godotenv"
+	"golang.org/x/oauth2"
+	"gopkg.in/yaml.v2"
 )
 
 type contract struct {
-    Name         string `yaml:"name"`
-    Version      string `yaml:"version"`
-    Purpose      string `yaml:"Purpose"`
-    Collaborator []struct {
-        Name         string `yaml:"name"`
-        ContractRepo string `yaml:"contract_repo"`
-        UserAgents   []struct {
-            Name  string `yaml:"name"`
-            Email string `yaml:"email"`
-        } `yaml:"user_agents"`
-        Warehouse []struct {
-            Name string `yaml:"name"`
-        } `yaml:"warehouse"`
-    } `yaml:"collaborators"`
-    ComputeWarehouse string `yaml:"compute_warehouse"`
+	Name         string `yaml:"name"`
+	Version      string `yaml:"version"`
+	Purpose      string `yaml:"Purpose"`
+	Collaborator []struct {
+		Name         string `yaml:"name"`
+		ContractRepo string `yaml:"contract_repo"`
+		UserAgents   []struct {
+			Name  string `yaml:"name"`
+			Email string `yaml:"email"`
+		} `yaml:"user_agents"`
+		Warehouse []struct {
+			Name string `yaml:"name"`
+		} `yaml:"warehouse"`
+	} `yaml:"collaborators"`
+	ComputeWarehouse string `yaml:"compute_warehouse"`
 }
 
-func extract (link string) string {
+func extract(link string) string {
 	ctx := context.Background()
 
 	tokenSource := oauth2.StaticTokenSource(
@@ -63,7 +64,6 @@ func extract (link string) string {
 	return content
 }
 
-
 func main() {
 
 	err := godotenv.Load(".env")
@@ -72,35 +72,34 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Println("Parsing YAML file")
 
-    fmt.Println("Parsing YAML file")
+	var fileName string
+	flag.StringVar(&fileName, "f", "", "YAML file to parse.")
+	flag.Parse()
 
-    var fileName string
-    flag.StringVar(&fileName, "f", "", "YAML file to parse.")
-    flag.Parse()
+	if fileName == "" {
+		fmt.Println("Please provide yaml file by using -f option")
+		return
+	}
 
-    if fileName == "" {
-        fmt.Println("Please provide yaml file by using -f option")
-        return
-    }
+	yamlFile, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		fmt.Printf("Error reading YAML file: %s\n", err)
+		return
+	}
 
-    yamlFile, err := ioutil.ReadFile(fileName)
-    if err != nil {
-        fmt.Printf("Error reading YAML file: %s\n", err)
-        return
-    }
-
-    var yamlConfig contract
-    err = yaml.Unmarshal(yamlFile, &yamlConfig)
-    if err != nil {
-        fmt.Printf("Error parsing YAML file: %s\n", err)
-    } else {
+	var yamlConfig contract
+	err = yaml.Unmarshal(yamlFile, &yamlConfig)
+	if err != nil {
+		fmt.Printf("Error parsing YAML file: %s\n", err)
+	} else {
 		fmt.Printf("Parsed successfully\n")
 	}
 
-    fmt.Printf("Result: %v\n", yamlConfig)	
+	fmt.Printf("Result: %v\n", yamlConfig)
 
-	var git_repos [100] string 
+	var git_repos [100]string
 
 	var n = len(yamlConfig.Collaborator)
 
@@ -109,20 +108,20 @@ func main() {
 	}
 
 	var ini string
-	
-	for i:= 0; i< n; i++ {
 
-		if(i == 0) {
+	for i := 0; i < n; i++ {
+
+		if i == 0 {
 			ini = extract(git_repos[i])
 			continue
-		} 
+		}
 		temp := extract(git_repos[i])
 
-		if(ini != temp) {
+		if ini != temp {
 			fmt.Println("Content mismatch error")
 			os.Exit(1)
 		}
-		
+
 	}
 
 	fmt.Println("Contracts verified successfully")

@@ -1,12 +1,13 @@
 package main
 
 import (
-    "context"
-    "fmt"
-    "os"
+	"context"
+	"fmt"
+	"os"
+
+	"github.com/google/go-github/v37/github"
 	"github.com/joho/godotenv"
-    "github.com/google/go-github/v37/github"
-    "golang.org/x/oauth2"
+	"golang.org/x/oauth2"
 )
 
 func main() {
@@ -17,22 +18,22 @@ func main() {
 		os.Exit(1)
 	}
 
-    owner := os.Getenv("owner")
-    repo := "examplei"
-    token := 
+	owner := os.Getenv("owner")
+	repo := "examplei"
+	token := os.Getenv("token")
 
-    ctx := context.Background()
-    ts := oauth2.StaticTokenSource(
-        &oauth2.Token{AccessToken: token},
-    )
-    tc := oauth2.NewClient(ctx, ts)
-    client := github.NewClient(tc)
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tc := oauth2.NewClient(ctx, ts)
+	client := github.NewClient(tc)
 
-    _, err := client.Repositories.Delete(ctx, owner, repo)
-    if err != nil {
-        fmt.Println("Error deleting repository:", err)
-        os.Exit(1)
-    }
+	_, er := client.Repositories.Delete(ctx, owner, repo)
+	if er != nil {
+		fmt.Println("Error deleting repository:", er)
+		os.Exit(1)
+	}
 
-    fmt.Println("Repository deleted successfully")
+	fmt.Println("Repository deleted successfully")
 }
