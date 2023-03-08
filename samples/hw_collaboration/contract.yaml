@@ -3,21 +3,19 @@ version: 0.1
 Purpose: Attribution of XYZ Flight Ticket. 
 collaborators: 
 	- name: Airline
-	 	contract_repo: repo_link1
+	 	git_repo: repo_link1
 		user_agents: 
 			- name: John 
 				email: john@gmail.com 
 			- name: Hanna
 				email: hanna@gmail.com 
-		warehouse: 
-			- name: snowflake 
+		warehouse: snowflake 
 	- name: AdSense
-	 	contract_repo: repo_link2
+	 	git_repo: repo_link2
 		user_agents: 
 			- name: Hammond
 				email: hammond@gmail.com 
 			- name: Harry
 				email: harry@gmail.com 
-		warehouse: 
-			- name: bigquery 	
+		warehouse: bigquery
 compute_warehouse: snowflake 	

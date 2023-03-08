@@ -1,22 +1,21 @@
 name: AdSense
 tables: 
-	- name: Client_Network
-		database: Adsense_DB
-		schema: Advertisements
-		description: Clients for AdSense company to promote their product. 
-		columns_allowed: 
-			- name: client_id
-				masking_type: None
-				queries_allowed: 
-					- select 
-	- name: ad_unit 
-		database: Adsense_DB
-		schema: Advertisements
-		description: Ad Units deployed by Adsense company 
-		columns_allowed: 
-			- name: client_id
-				masking_type: None
-				queries_allowed: 
-					- select 
-	 
-				
+  - name: Client_Network
+    database: Adsense_DB
+    schema: Advertisements
+    description: Clients for AdSense company to promote their product.
+    columns_allowed:
+      - name: client_id
+        masking_type: None
+        queries_allowed:
+          - select
+  - name: ad_unit
+    database: Adsense_DB
+    schema: Advertisements
+    description: Ad Units deployed by Adsense company
+    columns_allowed:
+      - name: client_id
+        masking_type: sha256
+        queries_allowed:
+          - select
+

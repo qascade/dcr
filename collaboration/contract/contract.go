@@ -1,8 +1,9 @@
 package contract
 
 import (
-	log "github.com/sirupsen/logrus"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Interface that will be implemented by all contract types
@@ -11,6 +12,7 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
+// Contracter is the interface to which all contracts must implement
 type Contracter interface {
 	Validate() error // Validate the yamls
 	Verify() error   // Verify through github repo's
@@ -49,7 +51,7 @@ func NewContract(spec ContractSpec) (*Contract, error) {
 		}
 		collaborators[c.Name] = Collaborator{
 			Name:       c.Name,
-			gitRepo:    c.gitRepo,
+			gitRepo:    c.GitRepo,
 			UserAgents: userAgents,
 			warehouse:  c.Warehouse,
 		}
@@ -61,19 +63,6 @@ func NewContract(spec ContractSpec) (*Contract, error) {
 		Collaborators: collaborators,
 	}
 	return contract, nil
-}
-
-// Contract Package structure
-// should contain three files
-// 1. contract.yaml
-// 2. two *_tables.yaml for each collaborator mentioned in contract.yaml
-// This function for now, is to validate names across over the contract package
-
-func ParseContract(path string) (*Contract, error) {
-	log.Debug("Parse not Implemented")
-	var cntract *Contract
-	cntract.Validate()
-	return nil, nil
 }
 
 func (c *Contract) Verify() error {

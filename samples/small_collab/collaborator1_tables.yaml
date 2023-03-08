@@ -1,21 +1,20 @@
 name: Airline
-tables: 
-	- name: customer_identifies 
-		database: sales
-		schema: product_sales
-		description: Identifies table for customers of Airline Company 
-		columns_allowed: 
-			- name: Location
-				masking_type: SHA256
-				queries_allowed: 
-					- select 
-	- name: customer_sales
-		database: sales
-		schema: product_sales
-		description: The First Party Sales data for the product advertised by adSense.
-		columns_allowed: 
-			- name: customer_id
-				masking_type: SHA256
-				queries_allowed: 
-					- select 
-			
+tables:
+  - name: customer_identifies
+    database: sales
+    schema: product_sales
+    description: Identifies table for customers of Airline Company
+    columns_allowed:
+      - name: Location
+        masking_type: SHA256
+        queries_allowed:
+          - select
+  - name: customer_sales
+    database: sales
+    schema: product_sales
+    description: The First Party Sales data for the product advertised by adSense.
+    columns_allowed:
+      - name: customer_id
+        masking_type: SHA256
+        queries_allowed:
+          - select

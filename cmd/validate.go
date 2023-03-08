@@ -11,13 +11,11 @@ import (
 // validateCmd represents the validate command
 var validateCmd = &cobra.Command{
 	Use:   "validate",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "This command will parse and validate the contract package with the given path",
+	Long: `
+This command will parse and validate the contract package with the given path.
+This command will check for name mismathces or table duplications or essential fields missing and return error if any.
+	`,
 	RunE: Validate,
 }
 
