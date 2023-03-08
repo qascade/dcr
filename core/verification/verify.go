@@ -3,8 +3,12 @@ package main
 import (
     "fmt"
     "flag"
+	"context"
     "io/ioutil"
     "gopkg.in/yaml.v2"
+	"github.com/google/go-github/v35/github"
+	"golang.org/x/oauth2"
+	"os"
 )
 
 type contract struct {
@@ -23,6 +27,40 @@ type contract struct {
         } `yaml:"warehouse"`
     } `yaml:"collaborators"`
     ComputeWarehouse string `yaml:"compute_warehouse"`
+}
+
+func extract (link string) string {
+	ctx := context.Background()
+
+	// Set up an authentication token if required
+	tokenSource := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: "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"},
+	)
+	tokenClient := oauth2.NewClient(ctx, tokenSource)
+
+	client := github.NewClient(tokenClient)
+
+	owner := "dcrcloud"
+	repo := link
+
+	filePath := "contract.yaml"
+
+	fileContents, _, _, err := client.Repositories.GetContents(
+		ctx, owner, repo, filePath, nil,
+	)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	content, err := fileContents.GetContent()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	fmt.Println(content)
+	return content
 }
 
 
@@ -52,5 +90,33 @@ func main() {
 		fmt.Printf("Parsed successfully\n")
 	}
 
-    fmt.Printf("Result: %v\n", yamlConfig)
+    fmt.Printf("Result: %v\n", yamlConfig)	
+
+	var git_repos [100] string 
+
+	var n = len(yamlConfig.Collaborator)
+
+	for i := 0; i < n; i++ {
+		git_repos[i] = yamlConfig.Collaborator[i].ContractRepo
+	}
+
+	var ini string
+	
+	for i:= 0; i< n; i++ {
+
+		if(i == 0) {
+			ini = extract(git_repos[i])
+			continue
+		} 
+		temp := extract(git_repos[i])
+
+		if(ini != temp) {
+			fmt.Println("Content mismatch error")
+			os.Exit(1)
+		}
+		
+	}
+
+	fmt.Println("Contracts verified successfully")
+
 }
