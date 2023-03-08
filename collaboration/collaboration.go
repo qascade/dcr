@@ -20,14 +20,38 @@ import (
 
 type CollaborationPackage struct {
 	collabPkg fs.FS
+	repoName string
+	ContractSpec *contract.ContractSpec
 }
 
-type GitRepoContent string
 // A Type of Collaboration Package must implement CollaborationParser interface
 type Collaboration interface {
 	Parse(path string) (*contract.ContractSpec, *[]contract.TablesContractSpec, error)
+	Verify(path string) error
+	UploadToRepo(linkToContractFile string) error
+	Terminate() error
+	GetContractSpec() *contract.ContractSpec
 }
 
+func NewCollaborationPkg(path string) (*CollaborationPackage, error) {
+	collabPkg := &CollaborationPackage{}
+	cSpec, _, err := collabPkg.Parse(path)
+	if err != nil {
+		return nil, err
+	}
+	for _, collaborator := range cSpec.Collaborators {
+		if collaborator.Name == cSpec.Name {
+			collabPkg.repoName = collaborator.GitRepo
+			break
+		}
+	}
+	collabPkg.ContractSpec = cSpec
+	return collabPkg, nil
+}
+
+func (c *CollaborationPackage) GetContractSpec() *contract.ContractSpec {
+	return c.ContractSpec
+}
 
 func (c *CollaborationPackage) Parse(path string) (*contract.ContractSpec, *[]contract.TablesContractSpec, error) {
 	c.collabPkg = os.DirFS(path)
@@ -116,5 +140,6 @@ func ParseSpec(fileYaml []byte, specType contract.SpecType) (contract.Spec, erro
 	}
 	return bs, err
 }
+
 
 

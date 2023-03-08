@@ -2,33 +2,27 @@ package tests
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
 
-	collab "github.com/qascade/dcr/collaboration"
+	"github.com/stretchr/testify/require"
 )
 
-type testPackage struct {
-	path string
-}
-
-
-func TestContract(t *testing.T) {
+func TestParseCollabPkg(t *testing.T) {
+	fmt.Println("Executing TestParseCollabPkg")
 	var testStructs = []testPackage{
 		{
 			path: "../samples/small_collab",
-		},
+		},	
 	}
-
 	for _, testStruct := range testStructs {
 		testParsing(t, testStruct)
-		testVerification(t, testStruct)
 	}
 
 }
 
+// TODO - Add custom stubs to compare. 
 func testParsing(t *testing.T, testStruct testPackage) {
-	var collabPkg collab.Collaboration = &collab.CollaborationPackage{}
+	collabPkg := setupCollabPkg(t, testStruct)
 	cSpec, tSpecs, err := collabPkg.Parse(testStruct.path)
 	require.NoError(t, err)
 	fmt.Println(cSpec)
@@ -40,8 +34,5 @@ func testParsing(t *testing.T, testStruct testPackage) {
 	require.NotNil(t, tSpecs)
 }
 
-func testVerification(t *testing.T, testStruct testPackage) {
-	// Contents of GitRepo Contract and Local Contract should match.
-	err := collab.Verify(testStruct.path)
-	require.NoError(t, err)
-}
+
+

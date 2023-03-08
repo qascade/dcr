@@ -11,6 +11,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type GitRepoContent string
+
 func GetContractFromRepo(link string) (*string, *error) {
 
 	ctx := context.Background()
@@ -45,19 +47,19 @@ func GetContractFromRepo(link string) (*string, *error) {
 	return &content, nil
 }
 
-func Verify(path string) error {
+func (c *CollaborationPackage) Verify(path string) error {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		err = errors.New("error loading environment variables file")
 		return err
 	}
 
-	var collabPkg Collaboration = &CollaborationPackage{}
-	cSpec, _, err := collabPkg.Parse(path)
+	var collabPkg Collaboration 
+	collabPkg, err = NewCollaborationPkg(path)
 	if err != nil {
 		return errors.New("error parsing contract.yaml file")
 	}
-
+	cSpec := collabPkg.GetContractSpec()
 	var gitRepos [100]string
 	var noOfCollaborators = len(cSpec.Collaborators)
 
@@ -68,12 +70,19 @@ func Verify(path string) error {
 	var currContractContent *string
 	for i := 0; i < noOfCollaborators; i++ {
 		if i == 0 {
-			currContractContent, _ = GetContractFromRepo(gitRepos[i])
+			var err *error
+			currContractContent, err = GetContractFromRepo(gitRepos[i])
+			if err != nil {
+				return errors.New("error getting contract.yaml file from GitRepo")
+			}
 			continue
 		}
-		intermidiateContractContent, _ := GetContractFromRepo(gitRepos[i])
+		intermidiateContractContent, err := GetContractFromRepo(gitRepos[i])
+		if err != nil {
+			return errors.New("error getting contract.yaml file from GitRepo")
+		}
 		if currContractContent != intermidiateContractContent {
-			err = errors.New("contents of Contracts from GitRepo don't match")
+			err := errors.New("contents of Contracts from GitRepo don't match")
 			return err
 		}
 	}
@@ -82,7 +91,7 @@ func Verify(path string) error {
 	return nil
 }
 
-func Upload(linkToContractFile string, RepoName string) error {
+func (c *CollaborationPackage) UploadToRepo(linkToContractFile string) error {
 
 	err := godotenv.Load("../.env")
 	if err != nil {
@@ -99,10 +108,9 @@ func Upload(linkToContractFile string, RepoName string) error {
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	repoName := RepoName
 	repoDescription := "This is a new repo created by the client"
 	repo, _, err := client.Repositories.Create(ctx, "", &github.Repository{
-		Name:        &repoName,
+		Name:        &c.repoName,
 		Description: &repoDescription,
 	})
 	if err != nil {
@@ -113,7 +121,7 @@ func Upload(linkToContractFile string, RepoName string) error {
 	log.Printf("Created new repo: %v\n", *repo.HTMLURL)
 
 	owner := os.Getenv("owner")
-	repoT := RepoName
+	repoT := c.repoName
 	filePath := linkToContractFile
 
 	data, err := os.ReadFile(filePath)
@@ -144,7 +152,7 @@ func Upload(linkToContractFile string, RepoName string) error {
 	return nil
 }
 
-func Delete(repoName string) error {
+func (c *CollaborationPackage) Terminate() error {
 
 	err := godotenv.Load("../.env")
 	if err != nil {
@@ -153,7 +161,6 @@ func Delete(repoName string) error {
 	}
 
 	owner := os.Getenv("owner")
-	repo := repoName
 	token := os.Getenv("token")
 
 	ctx := context.Background()
@@ -163,10 +170,10 @@ func Delete(repoName string) error {
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	_, er := client.Repositories.Delete(ctx, owner, repo)
-	if er != nil {
-		log.Println("Error deleting repository:", er)
-		return er
+	_, err = client.Repositories.Delete(ctx, owner, c.repoName)
+	if err != nil {
+		log.Println("Error deleting repository:", err)
+		return err
 	}
 
 	log.Println("Repository deleted successfully")
