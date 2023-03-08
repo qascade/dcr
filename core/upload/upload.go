@@ -5,13 +5,21 @@ import (
 	"fmt"
 	"os"
 	"io/ioutil"
+	"github.com/joho/godotenv"
 	"github.com/google/go-github/v39/github"
 	"golang.org/x/oauth2"
 )
 
 func main() {
+
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Printf("Error loading environment variables file")
+		os.Exit(1)
+	}
+
 	ctx := context.Background()
-	token := "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"
+	token := os.Getenv("token")
 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -32,7 +40,7 @@ func main() {
 
 	fmt.Printf("Created new repo: %v\n", *repo.HTMLURL)
 
-	owner := "dcrcloud"
+	owner := os.Getenv("owner")
     repoT := "examplei"
     filePath := "example.txt"
 

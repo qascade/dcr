@@ -6,6 +6,7 @@ import (
 	"context"
     "io/ioutil"
     "gopkg.in/yaml.v2"
+	"github.com/joho/godotenv"
 	"github.com/google/go-github/v35/github"
 	"golang.org/x/oauth2"
 	"os"
@@ -39,7 +40,7 @@ func extract (link string) string {
 
 	client := github.NewClient(tokenClient)
 
-	owner := "dcrcloud"
+	owner := os.Getenv("owner")
 	repo := link
 
 	filePath := "contract.yaml"
@@ -64,6 +65,14 @@ func extract (link string) string {
 
 
 func main() {
+
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Printf("Error loading environment variables file")
+		os.Exit(1)
+	}
+
+
     fmt.Println("Parsing YAML file")
 
     var fileName string
