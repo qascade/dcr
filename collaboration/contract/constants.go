@@ -1,11 +1,11 @@
-package contract 
+package contract
 
 type WarehouseType string
 type QueryType string
 type MaskingType string
 type SpecType string
 
-type Spec interface {}
+type Spec interface{}
 
 const (
 	SnowFlake WarehouseType = "snowflake"
@@ -20,7 +20,7 @@ const (
 	SHA256 MaskingType = "sha256"
 )
 
-const ( 
-	ContractSpecType SpecType = "contract"
+const (
+	ContractSpecType       SpecType = "contract"
 	TablesContractSpecType SpecType = "table"
 )

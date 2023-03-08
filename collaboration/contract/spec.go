@@ -10,7 +10,7 @@ type ContractSpec struct {
 
 type CollaboratorSpec struct {
 	Name       string          `yaml:"name"`
-	GitRepo    string          `yaml:"git_repo"`
+	GitRepo    string          `yaml:"git_repo"` // Name of the git repo.
 	UserAgents []UserAgentSpec `yaml:"user_agents"`
 	Warehouse  WarehouseType   `yaml:"warehouse"`
 }
