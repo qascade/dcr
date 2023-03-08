@@ -54,7 +54,7 @@ func (c *CollaborationPackage) Verify(path string) error {
 		return err
 	}
 
-	var collabPkg Collaboration 
+	var collabPkg Collaboration
 	collabPkg, err = NewCollaborationPkg(path)
 	if err != nil {
 		return errors.New("error parsing contract.yaml file")

@@ -1,4 +1,4 @@
-package tests 
+package tests
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ func TestVerifyCollabPkg(t *testing.T) {
 	var testStructs = []testPackage{
 		{
 			path: "../samples/small_collab",
-		},	
+		},
 	}
 
 	for _, testStruct := range testStructs {

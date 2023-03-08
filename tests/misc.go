@@ -1,12 +1,11 @@
-package tests 
+package tests
 
-import ( 
-	"testing"
+import (
 	"github.com/stretchr/testify/require"
-	
+	"testing"
+
 	collab "github.com/qascade/dcr/collaboration"
 )
-
 
 type testPackage struct {
 	path string

@@ -3,9 +3,8 @@ package contract
 import (
 	"os"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/qascade/dcr/collaboration/utils"
-
+	log "github.com/sirupsen/logrus"
 )
 
 // Interface that will be implemented by all contract types
@@ -17,7 +16,7 @@ func init() {
 // Contracter is the interface to which all contracts must implement
 type Contracter interface {
 	Validate() error // Validate the yamls
-	Hash() error   // Hash the yamls
+	Hash() error     // Hash the yamls
 }
 
 type Contract struct {

@@ -12,7 +12,7 @@ func TestParseCollabPkg(t *testing.T) {
 	var testStructs = []testPackage{
 		{
 			path: "../samples/small_collab",
-		},	
+		},
 	}
 	for _, testStruct := range testStructs {
 		testParsing(t, testStruct)
@@ -20,7 +20,7 @@ func TestParseCollabPkg(t *testing.T) {
 
 }
 
-// TODO - Add custom stubs to compare. 
+// TODO - Add custom stubs to compare.
 func testParsing(t *testing.T, testStruct testPackage) {
 	collabPkg := setupCollabPkg(t, testStruct)
 	cSpec, tSpecs, err := collabPkg.Parse(testStruct.path)
@@ -33,6 +33,3 @@ func testParsing(t *testing.T, testStruct testPackage) {
 	require.NotNil(t, cSpec)
 	require.NotNil(t, tSpecs)
 }
-
-
-

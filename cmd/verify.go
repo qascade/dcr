@@ -4,8 +4,8 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	collab "github.com/qascade/dcr/collaboration"
+	"github.com/spf13/cobra"
 )
 
 var verifyCmd = &cobra.Command{
@@ -18,7 +18,7 @@ var verifyCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		collaboration := collab.Collaboration(collabPkg) 
+		collaboration := collab.Collaboration(collabPkg)
 		err = collaboration.Verify(contractPath)
 		if err != nil {
 			return err

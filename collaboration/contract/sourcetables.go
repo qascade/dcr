@@ -1,6 +1,6 @@
 package contract
 
-// TODO - Should we move these structs to package source? 
+// TODO - Should we move these structs to package source?
 type TableRegister struct {
 	collaborator *Collaborator
 	SourceTables map[string]SourceTable // Mapped with schema

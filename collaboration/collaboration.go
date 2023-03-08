@@ -19,8 +19,8 @@ import (
 // This function for now, is to validate names across over the contract package
 
 type CollaborationPackage struct {
-	collabPkg fs.FS
-	repoName string
+	collabPkg    fs.FS
+	repoName     string
 	ContractSpec *contract.ContractSpec
 }
 
@@ -55,10 +55,10 @@ func (c *CollaborationPackage) GetContractSpec() *contract.ContractSpec {
 
 func (c *CollaborationPackage) Parse(path string) (*contract.ContractSpec, *[]contract.TablesContractSpec, error) {
 	c.collabPkg = os.DirFS(path)
-	var(
-		cSpec contract.Spec
-		tSpec contract.Spec
-		cResult contract.ContractSpec
+	var (
+		cSpec    contract.Spec
+		tSpec    contract.Spec
+		cResult  contract.ContractSpec
 		tResults []contract.TablesContractSpec
 	)
 	var tablesRE = regexp.MustCompile(`.*_tables\.yaml`)
@@ -140,6 +140,3 @@ func ParseSpec(fileYaml []byte, specType contract.SpecType) (contract.Spec, erro
 	}
 	return bs, err
 }
-
-
-
