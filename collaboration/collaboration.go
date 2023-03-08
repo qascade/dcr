@@ -22,6 +22,7 @@ type CollaborationPackage struct {
 	collabPkg fs.FS
 }
 
+type GitRepoContent string
 // A Type of Collaboration Package must implement CollaborationParser interface
 type Collaboration interface {
 	Parse(path string) (*contract.ContractSpec, *[]contract.TablesContractSpec, error)
