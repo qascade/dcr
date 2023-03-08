@@ -32,7 +32,6 @@ type contract struct {
 func extract (link string) string {
 	ctx := context.Background()
 
-	// Set up an authentication token if required
 	tokenSource := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: "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"},
 	)
