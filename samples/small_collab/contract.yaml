@@ -1,23 +1,21 @@
 name: Clean Room Contract
 version: 0.1
-Purpose: Attribution of XYZ Flight Ticket. 
-collaborators: 
+purpose: Attribution of XYZ Flight Ticket.
+collaborators:
   - name: Airline
-    contract_repo: "example1"
-    user_agents: 
-      - name: John 
-        email: john@gmail.com 
+    git_repo: repo_link1
+    user_agents:
+      - name: John
+        email: john@gmail.com
       - name: Hanna
-        email: hanna@gmail.com 
-    warehouse: 
-    - name: snowflake 
+        email: hanna@gmail.com
+    warehouse: snowflake
   - name: AdSense
-    contract_repo: "example2"
-    user_agents: 
+    git_repo: repo_link2
+    user_agents:
       - name: Hammond
-        email: hammond@gmail.com 
+        email: hammond@gmail.com
       - name: Harry
-        email: harry@gmail.com 
-    warehouse: 
-    - name: bigquery 	
-compute_warehouse: snowflake 	  
+        email: harry@gmail.com
+    warehouse: bigquery
+compute_warehouse: snowflake
