@@ -91,8 +91,9 @@ func (c *CollaborationPackage) Verify(path string) error {
 	return nil
 }
 
-func (c *CollaborationPackage) UploadToRepo(linkToContractFile string) error {
+func (c *CollaborationPackage) UploadToRepo(path string) error {
 
+	// TODO - Path needed here is to the contract.yaml file. Not the directory.
 	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Printf("Error loading environment variables file")
@@ -122,9 +123,8 @@ func (c *CollaborationPackage) UploadToRepo(linkToContractFile string) error {
 
 	owner := os.Getenv("owner")
 	repoT := c.repoName
-	filePath := linkToContractFile
 
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -139,7 +139,7 @@ func (c *CollaborationPackage) UploadToRepo(linkToContractFile string) error {
 		context.Background(),
 		owner,
 		repoT,
-		filePath,
+		path,
 		fileOptions,
 	)
 	if err != nil {

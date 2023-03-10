@@ -25,6 +25,13 @@ func TestVerifyCollabPkg(t *testing.T) {
 func testVerification(t *testing.T, testStruct testPackage) {
 	// Contents of GitRepo Contract and Local Contract should match.
 	collabPkg := setupCollabPkg(t, testStruct)
-	err := collabPkg.Verify(testStruct.path)
+
+	err := collabPkg.UploadToRepo(testStruct.path)
+	require.NoError(t, err)
+
+	err = collabPkg.Verify(testStruct.path)
+	require.NoError(t, err)
+
+	err = collabPkg.Terminate()
 	require.NoError(t, err)
 }
