@@ -1,12 +1,12 @@
-
 package cmd
 
 import (
-	"fmt"
 	"embed"
-    "io/fs"
-    "os"
-    "path/filepath"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -26,7 +26,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("init called")
-		dublicateSampleFolder()
+		generateCollabFiles()
 		return nil
 	},
 }
@@ -35,78 +35,54 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 }
 
-//go:embed source_folder/*
-var sampleFolder embed.FS
+//go:embed collabsamples/hw_collaboration/*
+var f embed.FS
 
-func dublicateSampleFolder(){
-	destDir := "temp2"
-	sourceFolderPath := "temp"
-	//samples\hw_collaboration
+// this func, uses embed package and provides files inside [samples/hw_collaboration/*]
+// during run time.
+// Files are then saved in a new directory
+func generateCollabFiles() {
+	contractFile, err := f.ReadFile("collabsamples/hw_collaboration/contract.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	collaborator1_tables, err := f.ReadFile("collabsamples/hw_collaboration/collaborator1_tables.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	collaborator2_tables, err := f.ReadFile("collabsamples/hw_collaboration/collaborator2_tables.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// print(string(data))
 
-	err = copyFolder(sourceFolderPath, destDir)    
+	outputDir := "collab_pkg"
+	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+		err = os.MkdirAll(outputDir, 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	writeFilesToGivenOutputDir(outputDir, contractFile, collaborator1_tables, collaborator2_tables)
+
 }
 
-func copyFolder(sourceFolderPath, destinationFolderPath string) error {
-	// Get the current working directory
-	cwd, err := os.Getwd()
+// writing files to new directory, files data is fetched at runtime using embed package
+func writeFilesToGivenOutputDir(outputDir string, contractFile []byte, collaborator1_tables []byte, collaborator2_tables []byte) {
+	err := ioutil.WriteFile(filepath.Join(outputDir, "contract.yaml"), contractFile, 0644)
 	if err != nil {
-		return fmt.Errorf("could not get current working directory: %w", err)
+		log.Fatal(err)
 	}
 
-	// Construct the absolute paths to the source and destination folders
-	sourceAbsPath := filepath.Join(cwd, sourceFolderPath)
-	destAbsPath := filepath.Join(cwd, destinationFolderPath)
-
-	// Open the source folder
-	source, err := embed.Embed(sourceAbsPath)
+	err = ioutil.WriteFile(filepath.Join(outputDir, "collaborator1_tables.yaml"), collaborator1_tables, 0644)
 	if err != nil {
-		return fmt.Errorf("could not open source folder: %w", err)
+		log.Fatal(err)
 	}
 
-	// Create the destination folder if it doesn't exist
-	if _, err := os.Stat(destAbsPath); os.IsNotExist(err) {
-		if err := os.MkdirAll(destAbsPath, 0755); err != nil {
-			return fmt.Errorf("could not create destination folder: %w", err)
-		}
+	err = ioutil.WriteFile(filepath.Join(outputDir, "collaborator2_tables.yaml"), collaborator2_tables, 0644)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	// Copy files from the source to the destination folder
-	return filepath.Walk(sourceAbsPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return fmt.Errorf("could not access file %q: %w", path, err)
-		}
-
-		// Skip directories and hidden files
-		if info.IsDir() || filepath.Base(path)[0] == '.' {
-			return nil
-		}
-
-		// Open the source file
-		file, err := source.Open(path)
-		if err != nil {
-			return fmt.Errorf("could not open source file %q: %w", path, err)
-		}
-		defer file.Close()
-
-		// Create the destination file
-		destPath := filepath.Join(destAbsPath, path[len(sourceAbsPath):])
-		destDir := filepath.Dir(destPath)
-		if _, err := os.Stat(destDir); os.IsNotExist(err) {
-			if err := os.MkdirAll(destDir, 0755); err != nil {
-				return fmt.Errorf("could not create destination directory %q: %w", destDir, err)
-			}
-		}
-		dest, err := os.Create(destPath)
-		if err != nil {
-			return fmt.Errorf("could not create destination file %q: %w", destPath, err)
-		}
-		defer dest.Close()
-
-		// Copy the file contents
-		if _, err := io.Copy(dest, file); err != nil {
-			return fmt.Errorf("could not copy file contents from %q to %q: %w", path, destPath, err)
-		}
-
-		return nil
-	})
+	log.Println("File saved successfully!")
 }
