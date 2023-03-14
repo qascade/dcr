@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -12,25 +11,16 @@ import (
 	"github.com/snowflakedb/gosnowflake"
 )
 
-func (c *CollaborationPackage) ExecuteWarehouse(pathToSQLfile string) error {
+func (c *CollaborationPackage) ExecuteSql(pathToSQLfile string) error {
 
-	file, err := os.Open(pathToSQLfile)
-
-	if err != nil {
-		fmt.Println("Unable to access SQL file.")
-		return err
-	}
-
-	defer file.Close()
-
-	sqlQuery, err := ioutil.ReadAll(file)
+	sqlQuery, err := os.ReadFile(pathToSQLfile)
 
 	if err != nil {
 		fmt.Println("Unable to read SQL file")
 		return err
 	}
 
-	err = godotenv.Load("../.env")
+	err = godotenv.Load("../.dcr")
 	if err != nil {
 		err = errors.New("error loading environment variables file")
 		return err

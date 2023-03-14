@@ -1,15 +1,16 @@
 package collaboration
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"regexp"
 
-	"gopkg.in/yaml.v3"
-
+	"github.com/joho/godotenv"
 	"github.com/qascade/dcr/collaboration/contract"
 	"github.com/qascade/dcr/collaboration/utils"
+	"gopkg.in/yaml.v3"
 )
 
 // Collaboration Package structure
@@ -31,6 +32,7 @@ type Collaboration interface {
 	UploadToRepo(linkToContractFile string) error
 	Terminate() error
 	GetContractSpec() *contract.ContractSpec
+	Run(pathToSQLfile string) error
 }
 
 func NewCollaborationPkg(path string) (*CollaborationPackage, error) {
@@ -139,4 +141,19 @@ func ParseSpec(fileYaml []byte, specType contract.SpecType) (contract.Spec, erro
 		return bs, fmt.Errorf("error parsing yaml.  Parse result:\n%s\nParse error:%s", partialSpecYaml, err)
 	}
 	return bs, err
+}
+
+func (c *CollaborationPackage) Run(pathToSQLfile string) error {
+
+	err := godotenv.Load("../.dcr.")
+	if err != nil {
+		return errors.New("error loading environment variables file")
+	}
+
+	err = c.ExecuteSql(pathToSQLfile)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

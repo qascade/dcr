@@ -1,0 +1,7 @@
+Account="qv57909.ap-south-1"
+Organization="ZQMPCWI"
+User="aditya"
+Password="AdityaSingh123"
+Database="SNOWFLAKE_SAMPLE_DATA"
+Schema="WEATHER"
+Warehouse="COMPUTE_WH"
