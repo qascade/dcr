@@ -145,7 +145,7 @@ func ParseSpec(fileYaml []byte, specType contract.SpecType) (contract.Spec, erro
 
 func (c *CollaborationPackage) Run(pathToSQLfile string) error {
 
-	err := godotenv.Load("../.dcr.")
+	err := godotenv.Load("../.dcr")
 	if err != nil {
 		return errors.New("error loading environment variables file")
 	}
