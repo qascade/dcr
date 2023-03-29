@@ -3,6 +3,7 @@ package contract
 import (
 	"os"
 
+	"github.com/qascade/dcr/collaboration/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,6 +17,7 @@ func init() {
 type Contracter interface {
 	Validate() error // Validate the yamls
 	Verify() error   // Verify through github repo's
+	Hash() error     // Hash the yamls
 }
 
 type Contract struct {
@@ -23,6 +25,18 @@ type Contract struct {
 	Version       string
 	Purpose       string
 	Collaborators map[string]Collaborator
+}
+
+func (c *Contract) Hash() (hashstr string) {
+	hashStr := ""
+	hashStr += utils.HashString(c.Name)
+	hashStr += utils.HashString(c.Version)
+	hashStr += utils.HashString(c.Purpose)
+	for _, collaborator := range c.Collaborators {
+		hashStr += collaborator.Hash()
+	}
+	hashStr = utils.HashString(hashStr)
+	return hashStr
 }
 
 type Collaborator struct {
@@ -33,9 +47,29 @@ type Collaborator struct {
 	warehouse WarehouseType
 }
 
+func (c *Collaborator) Hash() (hashstr string) {
+	hashStr := ""
+	hashStr += utils.HashString(c.Name)
+	hashStr += utils.HashString(c.gitRepo)
+	for _, userAgent := range c.UserAgents {
+		hashStr += userAgent.Hash()
+	}
+	hashStr += utils.HashString(string(c.warehouse))
+	hashStr = utils.HashString(hashStr)
+	return hashStr
+}
+
 type UserAgent struct {
 	Name  string
 	Email string
+}
+
+func (u *UserAgent) Hash() (hashstr string) {
+	hashStr := ""
+	hashStr += utils.HashString(u.Name)
+	hashStr += utils.HashString(u.Email)
+	hashStr = utils.HashString(hashStr)
+	return hashStr
 }
 
 // Function to create instance of Contract from ContractSpec
