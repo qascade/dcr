@@ -1,0 +1,12 @@
+Customer ID,First Name,Last Name,Email Address,Phone Number,Number of Purchases,Page Visited,Time Spent on Page (in seconds),Age Range,Marital Status,Children Status,Education Level,Occupation
+20001,John,Smith,john.smith@example.com,(123) 456-7890,3,Homepage,60,25-34,Single,No Children,College Graduate,Professional
+20002,Jane,Doe,jane.doe@example.com,(234) 567-8901,2,Product Page,90,18-24,Single,No Children,High School Graduate,Student
+20003,Mark,Johnson,mark.johnson@example.com,(345) 678-9012,5,Contact Us,15,35-44,Married,Has Children,Graduate Degree,Professional
+20004,Emily,Jones,emily.jones@example.com,(456) 789-0123,1,FAQ,15,25-34,Single,No Children,College Graduate,Professional
+20005,David,Lee,david.lee@example.com,(567) 890-1234,2,Homepage,30,35-44,Married,Has Children,College Graduate,Service
+20006,Sarah,Johnson,sarah.johnson@example.com,(678) 901-2345,4,Homepage,60,25-34,Single,No Children,High School Graduate,Service
+20007,Chris,Green,chris.green@example.com,(789) 012-3456,1,Homepage,30,45-54,Married,Has Children,High School Graduate,Service
+20008,Emma,Johnson,emma.johnson@example.com,(890) 123-4567,1,Product Page,45,18-24,Single,No Children,High School Graduate,Student
+20009,Lisa,Wang,lisa.wang@example.com,(901) 234-5678,3,About Us,45,35-44,Married,Has Children,College Graduate,Professional
+20010,Ryan,Chen,ryan.chen@example.com,(012) 345-6789,2,FAQ,30,25-34,Married,Has Children,College Graduate,Service
+20011,Alex,Parker,alex.parker@example.com,(123) 456-7890,4,About Us,30,25-34,Married,Has Children,College Graduate,Professional
