@@ -5,6 +5,8 @@ package cmd
 
 import (
 	collab "github.com/qascade/dcr/collaboration"
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -33,4 +35,6 @@ var repoName string
 func init() {
 	rootCmd.AddCommand(uploadCmd)
 	uploadCmd.Flags().StringVarP(&contractPath, "path", "f", "", "Path to the contract file")
+	uploadCmd.Flags().StringVarP(&repoName, "name", "f", "", "Name of Repository to upload the contract to")
+
 }

@@ -4,6 +4,8 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+
 	collab "github.com/qascade/dcr/collaboration"
 	"github.com/spf13/cobra"
 )

@@ -2,19 +2,17 @@ package collaboration
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"errors"
+	"log"
+	"os"
 
 	"github.com/google/go-github/v35/github"
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 )
 
+func GetContractFromRepo(link string) (*string, *error) {
 
-
-func GetContractFromRepo(link string) (*GitRepoContent, error) {
-	
 	ctx := context.Background()
 
 	tokenSource := oauth2.StaticTokenSource(
@@ -34,60 +32,62 @@ func GetContractFromRepo(link string) (*GitRepoContent, error) {
 	)
 	if err != nil {
 		err = errors.New("error getting file contents from GitRepo")
-		return nil, err
+		return nil, &err
 	}
 
 	content, err := fileContents.GetContent()
 	if err != nil {
 		err = errors.New("error getting file content from Contract")
-		return nil, err
+		return nil, &err
 	}
 
-	fmt.Println(content)
+	log.Println(content)
+	return &content, nil
 }
 
 func Verify(path string) error {
-	err := godotenv.Load(".env")
+	err := godotenv.Load("../.env")
 	if err != nil {
-		return fmt.Errorf("error loading environment variables file")
+		err = errors.New("error loading environment variables file")
+		return err
 	}
 
 	var collabPkg CollaborationParser = &CollaborationPackage{}
 	cSpec, _, err := collabPkg.Parse(path)
 	if err != nil {
-		return fmt.Errorf("error parsing contract.yaml file, %v", err)
+		return errors.New("error parsing contract.yaml file")
 	}
 
-
 	var gitRepos [100]string
-
 	var noOfCollaborators = len(cSpec.Collaborators)
 
 	for i := 0; i < noOfCollaborators; i++ {
 		gitRepos[i] = cSpec.Collaborators[i].GitRepo
 	}
-	var currContractContent string
+
+	var currContractContent *string
 	for i := 0; i < noOfCollaborators; i++ {
 		if i == 0 {
-			currContractContent = GetContractFromRepo(gitRepos[i])
+			currContractContent, _ = GetContractFromRepo(gitRepos[i])
 			continue
 		}
-		intermidiateContractContent := GetContractFromRepo(gitRepos[i])
+		intermidiateContractContent, _ := GetContractFromRepo(gitRepos[i])
 		if currContractContent != intermidiateContractContent {
-			err = fmt.Errorf("contents of Contracts from GitRepo don't match")
+			err = errors.New("contents of Contracts from GitRepo don't match")
 			return err
 		}
 	}
-	fmt.Println("Contracts verified successfully")
+	log.Println("Contracts verified successfully")
+
 	return nil
 }
 
-func Upload() {
+func Upload(linkToContractFile string, RepoName string) error {
 
-	err := godotenv.Load(".env")
+	err := godotenv.Load("../.env")
 	if err != nil {
-		fmt.Printf("Error loading environment variables file")
-		os.Exit(1)
+		log.Printf("Error loading environment variables file")
+		return errors.New("Error loading environment variables file")
 	}
 
 	ctx := context.Background()
@@ -99,31 +99,31 @@ func Upload() {
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	repoName := "examplei"
-	repoDescription := "This is a new repo created via the GitHub API"
+	repoName := RepoName
+	repoDescription := "This is a new repo created by the client"
 	repo, _, err := client.Repositories.Create(ctx, "", &github.Repository{
 		Name:        &repoName,
 		Description: &repoDescription,
 	})
 	if err != nil {
-		fmt.Printf("Failed to create repo: %v\n", err)
-		os.Exit(1)
+		log.Printf("Failed to create repo: %v\n", err)
+		return errors.New("Failed to create repo.")
 	}
 
-	fmt.Printf("Created new repo: %v\n", *repo.HTMLURL)
+	log.Printf("Created new repo: %v\n", *repo.HTMLURL)
 
 	owner := os.Getenv("owner")
-	repoT := "examplei"
-	filePath := "example.txt"
+	repoT := RepoName
+	filePath := linkToContractFile
 
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Println(err)
+		return err
 	}
 
 	fileOptions := &github.RepositoryContentFileOptions{
-		Message: github.String("Add example file"),
+		Message: github.String("Add the contract file of the client"),
 		Content: data,
 	}
 
@@ -135,23 +135,25 @@ func Upload() {
 		fileOptions,
 	)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Println(err)
+		return err
 	}
 
-	fmt.Println("File uploaded successfully")
+	log.Println("File uploaded successfully")
+
+	return nil
 }
 
-func Delete() {
+func Delete(repoName string) error {
 
-	err := godotenv.Load(".env")
+	err := godotenv.Load("../.env")
 	if err != nil {
-		fmt.Printf("Error loading environment variables file")
-		os.Exit(1)
+		log.Printf("Error loading environment variables file")
+		return errors.New("Error loading environment variables file")
 	}
 
 	owner := os.Getenv("owner")
-	repo := "examplei"
+	repo := repoName
 	token := os.Getenv("token")
 
 	ctx := context.Background()
@@ -163,10 +165,10 @@ func Delete() {
 
 	_, er := client.Repositories.Delete(ctx, owner, repo)
 	if er != nil {
-		fmt.Println("Error deleting repository:", er)
-		os.Exit(1)
+		log.Println("Error deleting repository:", er)
+		return er
 	}
 
-	fmt.Println("Repository deleted successfully")
+	log.Println("Repository deleted successfully")
+	return nil
 }
-
