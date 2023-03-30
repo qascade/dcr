@@ -9,9 +9,11 @@ import (
 	"github.com/google/go-github/v35/github"
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
+
+	"github.com/qascade/dcr/utils"
 )
 
-func GetContractFromRepo(link string) (*string, *error) {
+func (c *CollaborationPackage) GetContractFromRepo(link string) (*string, *error) {
 
 	ctx := context.Background()
 
@@ -45,14 +47,18 @@ func GetContractFromRepo(link string) (*string, *error) {
 	return &content, nil
 }
 
-func Verify(path string) error {
-	err := godotenv.Load("../.env")
+func (c *CollaborationPackage) Verify(path string) error {
+	err := godotenv.Load(utils.DCR_ENV_FILE_PATH)
 	if err != nil {
 		err = errors.New("error loading environment variables file")
 		return err
 	}
 
-	var collabPkg CollaborationParser = &CollaborationPackage{}
+	var collabPkg Collaboration 
+ 	collabPkg, err = NewCollaborationPkg(path)
+	if err != nil {
+		return err
+	}
 	cSpec, _, err := collabPkg.Parse(path)
 	if err != nil {
 		return errors.New("error parsing contract.yaml file")
@@ -68,10 +74,10 @@ func Verify(path string) error {
 	var currContractContent *string
 	for i := 0; i < noOfCollaborators; i++ {
 		if i == 0 {
-			currContractContent, _ = GetContractFromRepo(gitRepos[i])
+			currContractContent, _ = collabPkg.GetContractFromRepo(gitRepos[i])
 			continue
 		}
-		intermidiateContractContent, _ := GetContractFromRepo(gitRepos[i])
+		intermidiateContractContent, _ := collabPkg.GetContractFromRepo(gitRepos[i])
 		if currContractContent != intermidiateContractContent {
 			err = errors.New("contents of Contracts from GitRepo don't match")
 			return err
@@ -82,12 +88,12 @@ func Verify(path string) error {
 	return nil
 }
 
-func Upload(linkToContractFile string, RepoName string) error {
+func (c * CollaborationPackage) UploadToRepo(linkToContractFile string) error {
 
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(utils.DCR_ENV_FILE_PATH)
 	if err != nil {
 		log.Printf("Error loading environment variables file")
-		return errors.New("Error loading environment variables file")
+		return errors.New("error loading environment variables file")
 	}
 
 	ctx := context.Background()
@@ -99,10 +105,9 @@ func Upload(linkToContractFile string, RepoName string) error {
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
-	repoName := RepoName
 	repoDescription := "This is a new repo created by the client"
 	repo, _, err := client.Repositories.Create(ctx, "", &github.Repository{
-		Name:        &repoName,
+		Name:        &c.repoName,
 		Description: &repoDescription,
 	})
 	if err != nil {
@@ -113,7 +118,7 @@ func Upload(linkToContractFile string, RepoName string) error {
 	log.Printf("Created new repo: %v\n", *repo.HTMLURL)
 
 	owner := os.Getenv("owner")
-	repoT := RepoName
+	repoT := c.repoName
 	filePath := linkToContractFile
 
 	data, err := os.ReadFile(filePath)
@@ -144,16 +149,16 @@ func Upload(linkToContractFile string, RepoName string) error {
 	return nil
 }
 
-func Delete(repoName string) error {
+func (c *CollaborationPackage) DeleteRepo() error {
 
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(utils.DCR_ENV_FILE_PATH)
 	if err != nil {
 		log.Printf("Error loading environment variables file")
 		return errors.New("Error loading environment variables file")
 	}
 
 	owner := os.Getenv("owner")
-	repo := repoName
+	repo := c.repoName
 	token := os.Getenv("token")
 
 	ctx := context.Background()

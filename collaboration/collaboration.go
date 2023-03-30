@@ -1,9 +1,9 @@
 package collaboration
 
 import (
-	"bytes"
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"regexp"
 
@@ -32,6 +32,8 @@ type Collaboration interface {
 	UploadToRepo(linkToContractFile string) error
 	Terminate() error
 	GetContractSpec() *contract.ContractSpec
+	GetContractFromRepo(link string) (*string, *error)
+	DeleteRepo() error
 }
 
 func NewCollaborationPkg(path string) (*CollaborationPackage, error) {
@@ -140,4 +142,13 @@ func ParseSpec(fileYaml []byte, specType contract.SpecType) (contract.Spec, erro
 		return bs, fmt.Errorf("error parsing yaml.  Parse result:\n%s\nParse error:%s", partialSpecYaml, err)
 	}
 	return bs, err
+}
+
+func (c* CollaborationPackage) Terminate() error {
+	err := c.DeleteRepo()
+	if err != nil {
+		return err
+	}
+	log.Println("Collaboration Terminate")
+	return err
 }

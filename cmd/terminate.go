@@ -10,7 +10,7 @@ import (
 )
 
 var terminateCmd = &cobra.Command{
-	Use:   "Terminate the contract between collaborators",
+	Use:   "terminate",
 	Short: "Terminate and delete the contract between the collaborators",
 	Long: `A cli tool to terminate the contracts. The required parameters is the name of the Repository in 
 			which the collaborator had uploaded the contract. `,

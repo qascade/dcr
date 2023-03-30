@@ -6,13 +6,14 @@ import (
 
 var (
 	DCR_VERSION string = "0.0.1"
-	DCR_ENV_FILE_NAME string = ".env"
-	DCR_DIR_NAME string = ".dcr"
+	DCR_ENV_FILE_NAME string = "/.env"
+	DCR_DIR_NAME string = "/.dcr"
 )
 
 var( 
 	HOME_DIR string
 	DCR_DIR_FILE_PATH string
+	DCR_ENV_FILE_PATH string
 )
 
 func init() {
@@ -22,5 +23,6 @@ func init() {
 		panic(err)
 	}
 	DCR_DIR_FILE_PATH = HOME_DIR + DCR_DIR_NAME
+	DCR_ENV_FILE_PATH = DCR_DIR_FILE_PATH + DCR_ENV_FILE_NAME
 }
 
