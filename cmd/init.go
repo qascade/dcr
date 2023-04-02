@@ -12,7 +12,7 @@ import (
 )
 
 // initCmd represents the init command
-// this cmd will generate colaboration sample config files in folder named "helloworld_configs" in same directory
+// this cmd will generate colaboration sample config files in folder named "hw_collaboration" in same directory
 // configs files name will be : "collaborator1_tables.yaml", "collaborator2_tables.yaml", "contract.yaml"
 
 var initCmd = &cobra.Command{
