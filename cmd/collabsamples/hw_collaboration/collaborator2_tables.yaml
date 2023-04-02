@@ -1,0 +1,91 @@
+
+tables: 
+  - name: Client_Network
+    database: Adsense_DB
+    schema: Advertisements
+    description: Clients for AdSense company to promote their product. 
+    columns_allowed: 
+      - name: client_id
+        masking_type: None
+        queries_allowed: 
+          - select 
+      - name: ad_clicks
+        masking_type: None
+        queries_allowed: 
+          - select
+      - name: ad_client_id
+        masking_type: None
+        queries_allowed: 
+          - select
+      - name: source 
+        masking_type: None
+        //description
+        queries_allowed: 
+          - select
+      - name: client_transaction_id
+          masking_type: SHA256
+          queries_allowed: 
+            - select
+        - name: payment_method
+          masking_type: SHA256
+          queries_allowed: 
+            - select
+    - name: ad_unit 
+      database: Adsense_DB
+      schema: Advertisements
+      description: Ad Units deployed by Adsense company 
+      columns_allowed: 
+        - name: client_id
+          masking_type: None
+          queries_allowed: 
+            - select 
+        - name: ad_unit_id
+          masking_type: None
+          queries_allowed: 
+            - select
+        - name: ad_format_code
+          masking_type: None
+          queries_allowed: 
+            - select
+        - name: ad_format
+          masking_type: None
+          queries_allowed: 
+            - select
+        - name: platform_type
+          masking_type: None
+          queries_allowed: 
+            - select
+        - name: website-partners
+          masking_type: None
+          queries_allowed:
+            - select
+        - ad_clicks 
+     - name: ad_clicks 
+        database: Adsense_DB
+        schema: Advertisements
+        description: ad_clicks along with people information that clicked the ad
+        columns_allowed:
+          - name: client_id
+            masking_type: None
+            queries_allowed: 
+              - select 
+          - name: ad_unit_id
+            masking_type: None
+            queries_allowed: 
+              - select
+          - name: ad_format_code
+            masking_type: None
+            queries_allowed: 
+              - select
+          - name: ad_format
+            masking_type: None
+            queries_allowed: 
+              - select
+          - name: platform_type
+            masking_type: None
+            queries_allowed: 
+              - select
+          - name: email 
+            masking_type: None 
+            queries_allowed: 
+              - select
