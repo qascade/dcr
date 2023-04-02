@@ -1,5 +1,6 @@
 package contract
 
+
 type ContractSpec struct {
 	Name             string             `yaml:"name"`
 	Version          string             `yaml:"version"`
@@ -36,5 +37,6 @@ type SourceTableSpec struct {
 type ColumnSpec struct {
 	Name           string      `yaml:"name"`
 	MaskingType    string      `yaml:"masking_type"`
-	QueriesAllowed []QueryType `yaml:"queries_allowed"`
+	queriesAllowed []QueryType `yaml:"queries_allowed"`
 }
+

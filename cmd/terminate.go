@@ -15,12 +15,12 @@ var terminateCmd = &cobra.Command{
 	Long: `A cli tool to terminate the contracts. The required parameters is the name of the Repository in 
 			which the collaborator had uploaded the contract. `,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run called")
+		fmt.Println("this command yet to be implemented but will terminate clean room service")
 	},
 }
 
 func init() {
+	var repoName string
 	rootCmd.AddCommand(terminateCmd)
 	terminateCmd.Flags().StringVarP(&repoName, "name", "f", "", "Name of Repository to upload the contract to")
-
 }
