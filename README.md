@@ -1,5 +1,5 @@
 # dcr
-A library to orchestrate interoperable Data Cleaning Services between Snowflake and BigQuery and Snowflake as destination. 
+A library to orchestrate interoperable Data Cleaning Services using Intel SGX based Containers.
 
 This Repo follows following [Contributing Guidelines](https://github.com/qascade/dcr/blob/main/CONTRIBUTING.md)
 

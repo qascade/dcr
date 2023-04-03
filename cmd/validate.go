@@ -1,10 +1,8 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -18,8 +16,6 @@ This command will check for name mismathces or table duplications or essential f
 	`,
 	RunE: Validate,
 }
-
-var contractPath string
 
 func Validate(cmd *cobra.Command, args []string) error {
 	// Takes the contract package path as input and parse yaml
