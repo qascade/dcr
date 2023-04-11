@@ -5,7 +5,6 @@ select count({{}}) from {{table1}} as {{}} join {{table2}} as {{}} on {{}} = {{}
 
 
 
-
 # advertiser 
 select media_exposures.campaign, count(*) as impressions, count(distinct ad_conversions.email) as conversions from media_exposures left join ad_conversions on media.email = ad.email 
 CTR = no. of conversions/impressions

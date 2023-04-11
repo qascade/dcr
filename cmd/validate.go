@@ -16,6 +16,7 @@ This command will check for name mismathces or table duplications or essential f
 	`,
 	RunE: Validate,
 }
+var contractPath string
 
 func Validate(cmd *cobra.Command, args []string) error {
 	// Takes the contract package path as input and parse yaml
