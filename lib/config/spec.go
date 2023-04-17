@@ -48,7 +48,7 @@ type SourceSpec struct {
 	Name        string `yaml:"name"`
 	CSVLocation string `yaml:"csv_location"`
 	Description string `yaml:"description"`
-	// TODO- Do we need to addaddressRef here?
+	// TODO- Do we need to add addressRef here?
 	ConsumersAllowed []string     `yaml:"consumers_allowed"`
 	Columns          []ColumnSpec `yaml:"columns"`
 }

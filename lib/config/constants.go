@@ -1,4 +1,4 @@
-package config
+package contract
 
 type WarehouseType string
 type QueryType string
