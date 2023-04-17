@@ -102,7 +102,7 @@ func (c *ConfigFolder) parseSourceSpec(pkgI pkgInfo) (*SourceGroupSpec, error) {
 	var sResult SourceGroupSpec
 	err = yaml.Unmarshal(sBytes, &sResult)
 	if err != nil {
-		return nil, fmt.Errorf("unable to unmarshal to TablesContractSpec, %s", sourceYamlPath)
+		return nil, fmt.Errorf("unable to unmarshal to SourceGroupSpec, %s", sourceYamlPath)
 	}
 	return &sResult, nil
 }
@@ -124,7 +124,7 @@ func (c *ConfigFolder) parseTransformationSpec(pkgI pkgInfo) (*TransformationGro
 	var tResult TransformationGroupSpec
 	err = yaml.Unmarshal(tBytes, &tResult)
 	if err != nil {
-		return nil, fmt.Errorf("unable to unmarshal to TablesContractSpec, %s", transformationYamlPath)
+		return nil, fmt.Errorf("unable to unmarshal to TransformationGroupSpec, %s", transformationYamlPath)
 	}
 	return &tResult, nil
 }
@@ -146,7 +146,7 @@ func (c *ConfigFolder) parseDestinationSpec(pkgI pkgInfo) (*DestinationGroupSpec
 	var dResult DestinationGroupSpec
 	err = yaml.Unmarshal(dBytes, &dResult)
 	if err != nil {
-		return nil, fmt.Errorf("unable to unmarshal to TablesContractSpec, %s", destinationYamlPath)
+		return nil, fmt.Errorf("unable to unmarshal to DestinationGroupSpec, %s", destinationYamlPath)
 	}
 	return &dResult, nil
 }

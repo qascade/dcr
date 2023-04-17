@@ -1,4 +1,4 @@
-package graph
+package address
 
 type Parent interface {
 	Parent() *ParentAddress
@@ -7,7 +7,7 @@ type Parent interface {
 
 type ParentAddress struct {
 	Parent DcrAddress
-	name string
+	name   string
 }
 
 // Address refers to folders in dcr lib. Adress is what will be the node in DCR Graph.
@@ -25,7 +25,6 @@ type DcrAddress interface {
 	//ListTransformations()
 	//ListAddresses()
 
-
 }
 
 const (
@@ -33,9 +32,9 @@ const (
 )
 
 const (
-	ADDRESS_TYPE_ROOT = "/"
-	ADDRESS_TYPE_SOURCE = "source/"
-	ADDRESS_TYPE_DESTINATION = "destination/"
+	ADDRESS_TYPE_ROOT           = "/"
+	ADDRESS_TYPE_SOURCE         = "source/"
+	ADDRESS_TYPE_DESTINATION    = "destination/"
 	ADDRESS_TYPE_TRANSFORMATION = "transformation/"
 )
 

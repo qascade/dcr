@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/qascade/dcr/lib/graph"
+	"github.com/qascade/dcr/lib/address"
 )
 
 type Spec interface{}
@@ -28,14 +28,14 @@ type CollaboratorSpec struct {
 // For now only supporting Count Query.
 // TODO - Make this Spec such that any type of transformation can be parsed using this spec.
 type TransformationSpec struct {
-	Name            string      `yaml:"name"`
-	Count           string      `yaml:"count"`
-	From            []graph.Ref `yaml:"from"`
-	NoiseType       string      `yaml:"noise_type"`
-	NoiseParams     []string    `yaml:"noise_parameters"`
-	JoinKey         string      `yaml:"join_key"`
-	Template        string      `yaml:"template"`
-	ConsumerAllowed []string    `yaml:"consumer_allowed"`
+	Name            string     `yaml:"name"`
+	Count           string     `yaml:"count"`
+	From            []FromSpec `yaml:"from"`
+	NoiseType       string     `yaml:"noise_type"`
+	NoiseParams     []string   `yaml:"noise_parameters"`
+	JoinKey         string     `yaml:"join_key"`
+	Template        string     `yaml:"template"`
+	ConsumerAllowed []string   `yaml:"consumer_allowed"`
 }
 
 type SourceGroupSpec struct {
@@ -48,7 +48,7 @@ type SourceSpec struct {
 	Name        string `yaml:"name"`
 	CSVLocation string `yaml:"csv_location"`
 	Description string `yaml:"description"`
-	// TODO- Do we need to add graphRef here?
+	// TODO- Do we need to addaddressRef here?
 	ConsumersAllowed []string     `yaml:"consumers_allowed"`
 	Columns          []ColumnSpec `yaml:"columns"`
 }
@@ -68,13 +68,18 @@ type DestinationGroupSpec struct {
 }
 
 type DestinationSpec struct {
-	Name              string    `yaml:"name"`
-	Requestee         string    `yaml:"request"`
-	TransformationRef graph.Ref `yaml:"transformation_ref"`
+	Name              string      `yaml:"name"`
+	Requestee         string      `yaml:"request"`
+	TransformationRef address.Ref `yaml:"transformation_ref"`
 }
 
 type DestinationAllowedSpec struct {
-	Ref           graph.Ref   `yaml:"ref"`
-	TablesAllowed []graph.Ref `yaml:"tables_allowed"`
-	NoiseParams   []any       `yaml:"noise_parameters"`
+	Ref           address.Ref   `yaml:"ref"`
+	TablesAllowed []address.Ref `yaml:"tables_allowed"`
+	NoiseParams   []any         `yaml:"noise_parameters"`
+}
+
+type FromSpec struct {
+	Name string      `yaml:"name"`
+	Ref  address.Ref `yaml:"ref"`
 }

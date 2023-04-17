@@ -4,9 +4,9 @@ transformations:
     count: email 
     from: 
       - name: table1
-        ref: collab1/source/collab1_table 
+        ref: collab1/source/collab1_table
       - name: table2
-        ref: /collab2/source/collab2_table 
+        ref: /collab2/source/collab2_table
     join_key: email
     noise_type: laplace
     noise_parameters: 
@@ -16,6 +16,6 @@ transformations:
       - threshold
     template: |
               SELECT WITH ANONYMIZATION OPTIONS(epsilon={{epsilon}}, delta={{delta}}, kappa={{kappa}})
-              ANON_COUNT({{count} CLAMPED {{threshold}}) AS {{name}} FROM {{table1}} join {{table2}} using {{join_key}}. 
+              ANON_COUNT({{count} CLAMPED {{threshold}}) AS {{name}} FROM {{table1}} join {{table2}} using {{join_key}}
     consumer_allowed: 
       - collab2
