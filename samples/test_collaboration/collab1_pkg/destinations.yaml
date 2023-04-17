@@ -1,0 +1,5 @@
+collaborator: collab1
+destinations: 
+  - name: collab1_destination
+    request: collab1
+    transformation_ref: /collab3/transformation/collab3_transformation

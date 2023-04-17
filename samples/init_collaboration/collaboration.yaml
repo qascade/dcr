@@ -1,0 +1,14 @@
+name: Flight Tickets Attribution Collaboration
+version: 0.0.1
+purpose: Customer Survey Collaboration
+service_type: IntelSGX 
+collaborators: 
+  - name: Airline
+    git_repo: link1
+    creds: location1
+  - name: Media
+    git_repo: link2
+    creds: location2
+  - name: Research
+    git_repo: link3
+    creds: location3

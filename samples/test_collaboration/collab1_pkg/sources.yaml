@@ -1,0 +1,25 @@
+collaborator: collab1 #name of collaborator 
+tables: 
+  - name: collab1_table
+    csv_location: ./collab1_table_csv.csv
+    description: table having data for airline customers
+    consumers_allowed: # who is allowed to write transformations on my sources. 
+      - collab3
+    columns:
+      - name: email 
+        type: string
+        masking_type: sha256
+        selectable: true # can you run select query on this col
+        aggregates_allowed: # no other aggregates are to be allowed. 
+          - aggregate1
+          - aggregate2  
+        join_key: true # can this column be used as a join_key
+destinations_allowed: 
+  - ref: /collab3/transformation/collab3_transformation 
+    tables_allowed: 
+      - /collab2/source/collab2_table 
+    noise_parameters: 
+      - epsilon: ln3 
+      - delta: 1e-5
+      - kappa: 1
+      - threshold: between 0 and 3  
