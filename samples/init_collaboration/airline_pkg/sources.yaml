@@ -3,8 +3,6 @@ tables:
   - name: Airline_Customers
     csv_location: ./airline_customers.csv
     description: table having data for airline customers
-    consumers_allowed: # who is allowed to write transformations on my sources. 
-      - research
     columns:
       - name: email 
         type: string
@@ -34,12 +32,12 @@ tables:
           - count
         selectable: true
         join_key: true
-destinations_allowed: 
-  - ref: /Research/transformation/private_total_customers 
-    tables_allowed: 
-      - /Media/source/media_customers 
-    noise_parameters: 
-      - epsilon: ln3 
-      - delta: 1e-5
-      - kappa: 1
-      - threshold: between 0 and 3  
+    consumers_allowed: # who is allowed to write transformations on my sources. 
+      - research
+    destinations_allowed: 
+      - ref: /Research/transformation/private_total_customers 
+        noise_parameters: 
+          - epsilon: ln3 
+          - delta: 1e-5
+          - kappa: 1
+          - threshold: between 0 and 3

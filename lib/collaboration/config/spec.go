@@ -1,28 +1,14 @@
 package config
 
 import (
-	"github.com/qascade/dcr/lib/graph"
+	"github.com/qascade/dcr/lib/collaboration/address"
 )
 
 type Spec interface{}
 
-type CollaborationSpec struct {
-	Name          string             `yaml:"name"`
-	Version       string             `yaml:"version"`
-	Purpose       string             `yaml:"purpose,omitempty"`
-	ServiceType   string             `yaml:"service_type"`
-	Collaborators []CollaboratorSpec `yaml:"collaborators"`
-}
-
 type TransformationGroupSpec struct {
 	CollaboratorRef string               `yaml:"collaborator"`
 	Transformations []TransformationSpec `yaml:"transformations"`
-}
-
-type CollaboratorSpec struct {
-	Name          string `yaml:"name"`
-	GitRepo       string `yaml:"git_repo"` // Name of the git repo.
-	CredsLocation string `yaml:"creds"`
 }
 
 // For now only supporting Count Query.
@@ -39,18 +25,18 @@ type TransformationSpec struct {
 }
 
 type SourceGroupSpec struct {
-	CollaboratorRef     string       `yaml:"collaborator"`
-	Sources             []SourceSpec `yaml:"tables"`
-	DestinationsAllowed []DestinationAllowedSpec
+	CollaboratorRef string       `yaml:"collaborator"`
+	Sources         []SourceSpec `yaml:"sources"`
 }
 
 type SourceSpec struct {
-	Name        string `yaml:"name"`
-	CSVLocation string `yaml:"csv_location"`
-	Description string `yaml:"description"`
+	Name        string       `yaml:"name"`
+	CSVLocation string       `yaml:"csv_location"`
+	Description string       `yaml:"description"`
+	Columns     []ColumnSpec `yaml:"columns"`
 	// TODO- Do we need to add addressRef here?
-	ConsumersAllowed []string     `yaml:"consumers_allowed"`
-	Columns          []ColumnSpec `yaml:"columns"`
+	ConsumersAllowed    []string                 `yaml:"consumers_allowed"`
+	DestinationsAllowed []DestinationAllowedSpec `yaml:"destinations_allowed"`
 }
 
 type ColumnSpec struct {
@@ -68,12 +54,16 @@ type DestinationGroupSpec struct {
 }
 
 type DestinationSpec struct {
-	Name              string      `yaml:"name"`
-	Requestee         string      `yaml:"request"`
-	TransformationRef address.Ref `yaml:"transformation_ref"`
+	Name string      `yaml:"name"`
+	Ref  address.Ref `yaml:"ref"`
 }
 
 type DestinationAllowedSpec struct {
-	Ref           address.Ref   `yaml:"ref"`
-	NoiseParams   []any         `yaml:"noise_parameters"`
+	Ref         address.Ref `yaml:"ref"`
+	NoiseParams []any       `yaml:"noise_parameters"`
+}
+
+type FromSpec struct {
+	Name string      `yaml:"name"`
+	Ref  address.Ref `yaml:"ref"`
 }

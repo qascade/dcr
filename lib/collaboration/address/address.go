@@ -1,7 +1,18 @@
 package address
 
+import (
+	"os"
+
+	log "github.com/Sirupsen/logrus"
+)
+
+func init() {
+	log.SetLevel(log.DebugLevel)
+	log.SetOutput(os.Stdout)
+}
+
 type Parent interface {
-	Parent() *ParentAddress
+	ParentAddress() *ParentAddress
 	Name() string
 }
 
@@ -14,7 +25,7 @@ type ParentAddress struct {
 type DcrAddress interface {
 	Parent
 	// Collaboration() *Collaboration
-	IsLevelRoot() bool
+	//IsRoot() bool
 	//AddAddress
 	//AddTransformationSpecs
 	//DeRefTranformationGroup
@@ -25,6 +36,23 @@ type DcrAddress interface {
 	//ListTransformations()
 	//ListAddresses()
 
+}
+type Address struct {
+	Parent
+	name string
+}
+
+func (a Address) ParentAddress() *ParentAddress {
+	log.Infof("parent function for address needs to be implemented")
+	return nil
+}
+
+func (a Address) Name() string {
+	return a.name
+}
+
+func NewAddress() DcrAddress {
+	return Address{}
 }
 
 const (
@@ -40,3 +68,7 @@ const (
 
 // All Address types will implement this interface
 type Ref string
+
+//SourceRef : /collaborator_name/source/source_table_name
+//DestinationRef : /collaborator_name/destination/destination_table_name
+//TransformationRef : /collaborator_name/transformation/transformation_group_name

@@ -5,8 +5,9 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
 	"github.com/qascade/dcr/lib/utils"
@@ -19,74 +20,95 @@ func init() {
 }
 
 type ConfigParser interface {
-	Parse(path string) (*CollaborationSpec, map[string]PackageConfig, error)
+	Parse(path string) (*CollaborationConfig, error)
 }
 
 // ConfigFolder is the root folder for all the config files and implements ConfigParser.
 type ConfigFolder struct{}
 
+type packageMetadata struct {
+	CollaboratorName string
+	PkgPath          string
+}
+
 // All the Specs associated with a single Collaborator
+type CollaborationConfig struct {
+	CollaborationFolderPath string
+	PackagesInfo            map[string]*PackageConfig
+}
+
 type PackageConfig struct {
-	pkgInfo                 pkgInfo
+	PackageMetadata         *packageMetadata
 	SourceSpec              *SourceGroupSpec
 	TransformationGroupSpec *TransformationGroupSpec
 	DestinationGroupSpec    *DestinationGroupSpec
 }
 
-func (c ConfigFolder) Parse(path string) (*CollaborationSpec, map[string]PackageConfig, error) {
-	collabConfig := make(map[string]PackageConfig)
-	cSpec, err := c.parseCollaborationSpec(path)
+func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
+	log.Info("Parsing the config folder with path %s", path)
+	pkgsInfo := make(map[string]*PackageConfig)
+	var pkgPaths []string
+	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			pkgPaths = append(pkgPaths, path)
+		}
+		return nil
+	})
 	if err != nil {
-		return nil, nil, err
+		return nil, fmt.Errorf("error while walking through the path: %v", err)
 	}
-	pkgInfos := c.getPkgInfos(cSpec, path)
-	for _, pkgInfo := range pkgInfos {
-		sSpec, err := c.parseSourceSpec(pkgInfo)
+	pkgPaths = pkgPaths[1:]
+	for _, pkgPath := range pkgPaths {
+		var pkgConfig *PackageConfig
+		pkgConfig, err = c.newPackageConfig(pkgPath)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
-		tSpec, err := c.parseTransformationSpec(pkgInfo)
-		if err != nil {
-			return nil, nil, err
-		}
-		dSpec, err := c.parseDestinationSpec(pkgInfo)
-		if err != nil {
-			return nil, nil, err
-		}
-		collabConfig[pkgInfo.CollaboratorName] = PackageConfig{
-			pkgInfo:                 pkgInfo,
-			SourceSpec:              sSpec,
-			TransformationGroupSpec: tSpec,
-			DestinationGroupSpec:    dSpec,
-		}
+		pkgsInfo[pkgConfig.PackageMetadata.CollaboratorName] = pkgConfig
 	}
-	return cSpec, collabConfig, nil
+	collabConfig := &CollaborationConfig{
+		CollaborationFolderPath: path,
+		PackagesInfo:            pkgsInfo,
+	}
+	return collabConfig, nil
 }
 
-func (c *ConfigFolder) parseCollaborationSpec(path string) (*CollaborationSpec, error) {
-	collaborationYamlPath := path + "/collaboration.yaml"
-	collaborationSpecB, err := os.ReadFile(collaborationYamlPath)
+func (c *ConfigFolder) newPackageConfig(pkgPath string) (*PackageConfig, error) {
+	sSpec, err := c.parseSourceSpec(pkgPath)
 	if err != nil {
-		return nil, fmt.Errorf("error while reading the file: %w", err)
+		return nil, err
 	}
-	cSpec, err := ParseSpec(collaborationSpecB, CollaborationSpecType)
+	tSpec, err := c.parseTransformationSpec(pkgPath)
 	if err != nil {
-		return nil, fmt.Errorf("error while reading the file: %w", err)
+		return nil, err
 	}
-	cBytes, err := yaml.Marshal(cSpec)
+	dSpec, err := c.parseDestinationSpec(pkgPath)
 	if err != nil {
-		return nil, fmt.Errorf("error while marshalling the file: %w", err)
+		return nil, err
 	}
-	var cResult CollaborationSpec
-	err = yaml.Unmarshal(cBytes, &cResult)
-	if err != nil {
-		return nil, fmt.Errorf("unable to unmarshal to Spec, %s", collaborationYamlPath)
-	}
-	return &cResult, nil
-}
 
-func (c *ConfigFolder) parseSourceSpec(pkgI pkgInfo) (*SourceGroupSpec, error) {
-	sourceYamlPath := pkgI.PkgPath + "/sources.yaml"
+	log.Info("Validating the CollaboratorRefs for all the specs, %s", sSpec.CollaboratorRef)
+	_, err = ValidateAllCollaboratorRefsEqual(sSpec.CollaboratorRef, tSpec.CollaboratorRef, dSpec.CollaboratorRef)
+	if err != nil {
+		return nil, err
+	}
+
+	pkgConfig := &PackageConfig{
+		PackageMetadata: &packageMetadata{
+			CollaboratorName: sSpec.CollaboratorRef,
+			PkgPath:          pkgPath,
+		},
+		SourceSpec:              sSpec,
+		TransformationGroupSpec: tSpec,
+		DestinationGroupSpec:    dSpec,
+	}
+	return pkgConfig, nil
+}
+func (c *ConfigFolder) parseSourceSpec(path string) (*SourceGroupSpec, error) {
+	sourceYamlPath := path + "/sources.yaml"
 	sourceSpecB, err := os.ReadFile(sourceYamlPath)
 	if err != nil {
 		return nil, fmt.Errorf("error while reading the file: %w", err)
@@ -104,11 +126,17 @@ func (c *ConfigFolder) parseSourceSpec(pkgI pkgInfo) (*SourceGroupSpec, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal to SourceGroupSpec, %s", sourceYamlPath)
 	}
+	for _, sourceSpec := range sResult.Sources {
+		sourceSpec.CSVLocation, err = filepath.Abs(sourceSpec.CSVLocation)
+		if err != nil {
+			return nil, fmt.Errorf("unable to get the absolute path of the csv file: %w", err)
+		}
+	}
 	return &sResult, nil
 }
 
-func (c *ConfigFolder) parseTransformationSpec(pkgI pkgInfo) (*TransformationGroupSpec, error) {
-	transformationYamlPath := pkgI.PkgPath + "/transformations.yaml"
+func (c *ConfigFolder) parseTransformationSpec(path string) (*TransformationGroupSpec, error) {
+	transformationYamlPath := path + "/transformations.yaml"
 	transformationSpecB, err := os.ReadFile(transformationYamlPath)
 	if err != nil {
 		return nil, fmt.Errorf("error while reading the file: %w", err)
@@ -129,8 +157,8 @@ func (c *ConfigFolder) parseTransformationSpec(pkgI pkgInfo) (*TransformationGro
 	return &tResult, nil
 }
 
-func (c *ConfigFolder) parseDestinationSpec(pkgI pkgInfo) (*DestinationGroupSpec, error) {
-	destinationYamlPath := pkgI.PkgPath + "/destinations.yaml"
+func (c *ConfigFolder) parseDestinationSpec(path string) (*DestinationGroupSpec, error) {
+	destinationYamlPath := path + "/destinations.yaml"
 	destinationSpecB, err := os.ReadFile(destinationYamlPath)
 	if err != nil {
 		return nil, fmt.Errorf("error while reading the file: %w", err)
@@ -151,20 +179,6 @@ func (c *ConfigFolder) parseDestinationSpec(pkgI pkgInfo) (*DestinationGroupSpec
 	return &dResult, nil
 }
 
-type pkgInfo struct {
-	CollaboratorName string
-	PkgPath          string
-}
-
-func (c *ConfigFolder) getPkgInfos(cSpec *CollaborationSpec, pkgDirPath string) []pkgInfo {
-	var pkgInfos []pkgInfo
-	for _, collaborator := range cSpec.Collaborators {
-		path := pkgDirPath + "/" + collaborator.Name + "_pkg"
-		pkgInfos = append(pkgInfos, pkgInfo{CollaboratorName: collaborator.Name, PkgPath: path})
-	}
-	return pkgInfos
-}
-
 func ParseSpec(yamlBytes []byte, specType SpecType) (Spec, error) {
 	var bs Spec
 	switch specType {
@@ -174,8 +188,6 @@ func ParseSpec(yamlBytes []byte, specType SpecType) (Spec, error) {
 		bs = TransformationGroupSpec{}
 	case DestinationSpecType:
 		bs = DestinationGroupSpec{}
-	case CollaborationSpecType:
-		bs = CollaborationSpec{}
 	}
 	err := utils.UnmarshalStrict(yamlBytes, &bs)
 	if err != nil {
