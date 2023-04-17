@@ -1,0 +1,21 @@
+collaborator: collab1
+transformations: 
+  - name: transformation1 # research/tranformation/private_total_count/output
+    count: email 
+    from: 
+      - name: table1
+        ref: /collab3/source/collab1_table 
+      - name: table2
+        ref: /collab2/soure/collab2_table 
+    join_key: email
+    noise_type: laplace
+    noise_parameters: 
+      - epsilon 
+      - delta
+      - kappa
+      - threshold
+    template: |
+              SELECT WITH ANONYMIZATION OPTIONS(epsilon={{epsilon}}, delta={{delta}}, kappa={{kappa}})
+              ANON_COUNT({{count} CLAMPED {{threshold}}) AS {{name}} FROM {{table1}} join {{table2}} using {{join_key}}
+    consumer_allowed: 
+      - collab2

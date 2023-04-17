@@ -5,9 +5,10 @@
 *.so
 *.dylib
 .vscode
+.idea 
 
 dcr
-
+bin/
 
 # Test binary, built with `go test -c`
 *.test

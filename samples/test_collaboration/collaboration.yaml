@@ -1,0 +1,14 @@
+name: Sample Collaboration
+version: 0.0.1
+purpose: Purpose of Sample Collaboration
+service_type: IntelSGX 
+collaborators: 
+  - name: collab1
+    git_repo: link1
+    creds: location1
+  - name: collab2
+    git_repo: link2
+    creds: location2
+  - name: collab3
+    git_repo: link3
+    creds: location3

@@ -7,6 +7,7 @@ import (
 )
 
 // generateCmd represents the generate command
+// generate will generate the source code that will run on the edgeless db server.
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "A brief description of your command",

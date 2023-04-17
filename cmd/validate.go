@@ -9,21 +9,25 @@ import (
 // validateCmd represents the validate command
 var validateCmd = &cobra.Command{
 	Use:   "validate",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "This command will parse and validate the contract package with the given path",
+	Long: `
+This command will parse and validate the contract package with the given path.
+This command will check for name mismathces or table duplications or essential fields missing and return error if any.
+	`,
+	RunE: Validate,
+}
+var contractPath string
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("validate called")
-	},
+func Validate(cmd *cobra.Command, args []string) error {
+	// Takes the contract package path as input and parse yaml
+	contractPath = cmd.Flag("path").Value.String()
+	fmt.Println(contractPath)
+	return nil
 }
 
 func init() {
 	rootCmd.AddCommand(validateCmd)
-
+	validateCmd.Flags().StringVarP(&contractPath, "path", "f", "", "Path to the contract package")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

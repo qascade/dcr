@@ -1,0 +1,21 @@
+collaborator: Research
+transformations: 
+  - name: private_total_customers # research/tranformation/private_total_count/output
+    count: email 
+    from: 
+      - name: table1
+        ref: ad_customers 
+      - name: table2
+        ref: /Media/media_customers 
+    join_key: email
+    noise_type: laplace
+    noise_parameters: 
+      - epsilon 
+      - delta
+      - kappa
+      - threshold
+    template: |
+              SELECT WITH ANONYMIZATION OPTIONS(epsilon={{epsilon}}, delta={{delta}}, kappa={{kappa}})
+              ANON_COUNT({{count} CLAMPED {{threshold}}) AS {{name}} FROM {{table1}} join {{table2}} using {{join_key}}. 
+    consumer_allowed: 
+      - Media
