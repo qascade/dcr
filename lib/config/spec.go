@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/qascade/dcr/lib/address"
+	"github.com/qascade/dcr/lib/graph"
 )
 
 type Spec interface{}
@@ -75,11 +75,5 @@ type DestinationSpec struct {
 
 type DestinationAllowedSpec struct {
 	Ref           address.Ref   `yaml:"ref"`
-	TablesAllowed []address.Ref `yaml:"tables_allowed"`
 	NoiseParams   []any         `yaml:"noise_parameters"`
-}
-
-type FromSpec struct {
-	Name string      `yaml:"name"`
-	Ref  address.Ref `yaml:"ref"`
 }
