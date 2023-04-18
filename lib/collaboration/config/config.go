@@ -28,16 +28,17 @@ type ConfigFolder struct{}
 
 type packageMetadata struct {
 	CollaboratorName string
-	PkgPath 		string
+	PkgPath          string
 }
+
 // All the Specs associated with a single Collaborator
 type CollaborationConfig struct {
 	CollaborationFolderPath string
-	PackagesInfo map[string]*PackageConfig
+	PackagesInfo            map[string]*PackageConfig
 }
 
 type PackageConfig struct {
-	PackageMetadata                 *packageMetadata
+	PackageMetadata         *packageMetadata
 	SourceSpec              *SourceGroupSpec
 	TransformationGroupSpec *TransformationGroupSpec
 	DestinationGroupSpec    *DestinationGroupSpec
@@ -47,15 +48,15 @@ func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
 	log.Info("Parsing the config folder with path %s", path)
 	pkgsInfo := make(map[string]*PackageConfig)
 	var pkgPaths []string
-    err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-        if info.IsDir() {
-            pkgPaths = append(pkgPaths, path)
-        }
-        return nil
-    })
+		if info.IsDir() {
+			pkgPaths = append(pkgPaths, path)
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, fmt.Errorf("error while walking through the path: %v", err)
 	}
@@ -70,7 +71,7 @@ func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
 	}
 	collabConfig := &CollaborationConfig{
 		CollaborationFolderPath: path,
-		PackagesInfo: pkgsInfo,
+		PackagesInfo:            pkgsInfo,
 	}
 	return collabConfig, nil
 }
@@ -96,9 +97,9 @@ func (c *ConfigFolder) newPackageConfig(pkgPath string) (*PackageConfig, error) 
 	}
 
 	pkgConfig := &PackageConfig{
-		PackageMetadata:                 &packageMetadata{
+		PackageMetadata: &packageMetadata{
 			CollaboratorName: sSpec.CollaboratorRef,
-			PkgPath: pkgPath,
+			PkgPath:          pkgPath,
 		},
 		SourceSpec:              sSpec,
 		TransformationGroupSpec: tSpec,
