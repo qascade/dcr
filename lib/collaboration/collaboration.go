@@ -3,12 +3,18 @@ package collaboration
 import (
 	"github.com/qascade/dcr/lib/collaboration/address"
 	"github.com/qascade/dcr/lib/collaboration/config"
+	"github.com/qascade/dcr/lib/collaboration/destination"
+	"github.com/qascade/dcr/lib/collaboration/source"
+	"github.com/qascade/dcr/lib/collaboration/transformation"
 )
 
 type Collaboration struct {
-	RootAddress         *address.DcrAddress
-	Collaborators       []string
-	collaborationConfig config.CollaborationConfig
+	AddressGraph          *address.Graph
+	Collaborators         []string
+	collaborationConfig   config.CollaborationConfig
+	cachedSources         map[string]source.Source
+	cachedTransformations map[string]transformation.Transformation
+	cachedDestination     map[string]destination.Destination
 }
 
 func NewCollaboration(collabConfig config.CollaborationConfig) *Collaboration {
@@ -17,9 +23,10 @@ func NewCollaboration(collabConfig config.CollaborationConfig) *Collaboration {
 		collaboratorName := pkgConfig.PackageMetadata.CollaboratorName
 		collaborators = append(collaborators, collaboratorName)
 	}
-	rootAddress := address.NewAddress()
+	graph := address.NewGraph()
 	return &Collaboration{
-		RootAddress:   &rootAddress,
-		Collaborators: collaborators,
+		AddressGraph:        graph,
+		Collaborators:       collaborators,
+		collaborationConfig: collabConfig,
 	}
 }

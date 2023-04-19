@@ -5,4 +5,6 @@ tidy:
 vendor: 
 	go mod vendor
 fmt: 
-	gofmt -s -w . 
+	go fmt ./...
+test: build
+	go test ./...

@@ -3,6 +3,9 @@ package address
 import (
 	"os"
 
+	"github.com/qascade/dcr/lib/collaboration/destination"
+	"github.com/qascade/dcr/lib/collaboration/source"
+	"github.com/qascade/dcr/lib/collaboration/transformation"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -11,64 +14,61 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
-type Parent interface {
-	ParentAddress() *ParentAddress
-	Name() string
+type Graph map[DcrAddress][]DcrAddress
+
+func NewGraph() *Graph {
+	return &Graph{}
 }
 
-type ParentAddress struct {
-	Parent DcrAddress
-	name   string
-}
+type CollaboratorName string
 
-// Address refers to folders in dcr lib. Adress is what will be the node in DCR Graph.
+// All AddressNodeTypes must implement this interface
 type DcrAddress interface {
-	Parent
-	// Collaboration() *Collaboration
-	//IsRoot() bool
-	//AddAddress
-	//AddTransformationSpecs
-	//DeRefTranformationGroup
-	//DeRefTransformation
-	//DeRefAddressGroup
-	//DeRefAddress
-
-	//ListTransformations()
-	//ListAddresses()
-
-}
-type Address struct {
-	Parent
-	name string
+	Authorize() (bool, error) // Is a Collaborator Allowed to Move further into the graph.
+	//Deref  // Function that returns the real transformation
+	Type() AddressType // Returns the type of Address.
 }
 
-func (a Address) ParentAddress() *ParentAddress {
-	log.Infof("parent function for address needs to be implemented")
-	return nil
+type SourceAddress struct {
+	Owner               CollaboratorName
+	ConsumersAllowed    []CollaboratorName
+	DestinationsAllowed []CollaboratorName
+	Source              *source.Source
 }
 
-func (a Address) Name() string {
-	return a.name
+func (sa *SourceAddress) Authorize(collabName CollaboratorName) (bool, error) {
+	return true, nil
 }
 
-func NewAddress() DcrAddress {
-	return Address{}
+func (sa *SourceAddress) Type() AddressType {
+	return ADDRESS_TYPE_SOURCE
 }
 
-const (
-	COLLABORATION_FOLDER_NAME = "collaboration"
-)
+type TransformationAddress struct {
+	Owner               CollaboratorName
+	Runner              CollaboratorName
+	ConsumersAllowed    []CollaboratorName
+	DestinationsAllowed []CollaboratorName
+	Transformation      *transformation.Transformation
+}
 
-const (
-	ADDRESS_TYPE_ROOT           = "/"
-	ADDRESS_TYPE_SOURCE         = "source/"
-	ADDRESS_TYPE_DESTINATION    = "destination/"
-	ADDRESS_TYPE_TRANSFORMATION = "transformation/"
-)
+func (ta *TransformationAddress) Authorize(collabName CollaboratorName) (bool, error) {
+	return true, nil
+}
 
-// All Address types will implement this interface
-type Ref string
+func (ta *TransformationAddress) Type() AddressType {
+	return ADDRESS_TYPE_TRANSFORMATION
+}
 
-//SourceRef : /collaborator_name/source/source_table_name
-//DestinationRef : /collaborator_name/destination/destination_table_name
-//TransformationRef : /collaborator_name/transformation/transformation_group_name
+type DestinationAddress struct {
+	Requester   CollaboratorName
+	Destination *destination.Destination
+}
+
+func (da *DestinationAddress) Authorize(collabName CollaboratorName) (bool, error) {
+	return true, nil
+}
+
+func (da *DestinationAddress) Type() AddressType {
+	return ADDRESS_TYPE_DESTINATION
+}
