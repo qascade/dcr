@@ -26,11 +26,6 @@ type ConfigParser interface {
 // ConfigFolder is the root folder for all the config files and implements ConfigParser.
 type ConfigFolder struct{}
 
-type packageMetadata struct {
-	CollaboratorName string
-	PkgPath          string
-}
-
 // All the Specs associated with a single Collaborator
 type CollaborationConfig struct {
 	CollaborationFolderPath string
@@ -38,14 +33,16 @@ type CollaborationConfig struct {
 }
 
 type PackageConfig struct {
-	PackageMetadata         *packageMetadata
+	CollaboratorName        string
+	PkgPath                 string
+	OutpuFolderPath         string
 	SourceSpec              *SourceGroupSpec
 	TransformationGroupSpec *TransformationGroupSpec
 	DestinationGroupSpec    *DestinationGroupSpec
 }
 
 func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
-	log.Info("Parsing the config folder with path %s", path)
+	log.Infof("Parsing the config folder with path %s", path)
 	pkgsInfo := make(map[string]*PackageConfig)
 	var pkgPaths []string
 	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
@@ -67,7 +64,7 @@ func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
 		if err != nil {
 			return nil, err
 		}
-		pkgsInfo[pkgConfig.PackageMetadata.CollaboratorName] = pkgConfig
+		pkgsInfo[pkgConfig.CollaboratorName] = pkgConfig
 	}
 	collabConfig := &CollaborationConfig{
 		CollaborationFolderPath: path,
@@ -90,17 +87,16 @@ func (c *ConfigFolder) newPackageConfig(pkgPath string) (*PackageConfig, error) 
 		return nil, err
 	}
 
-	log.Info("Validating the CollaboratorRefs for all the specs, %s", sSpec.CollaboratorRef)
+	log.Infof("Validating the CollaboratorRefs for all the specs, %s", sSpec.CollaboratorRef)
 	_, err = ValidateAllCollaboratorRefsEqual(sSpec.CollaboratorRef, tSpec.CollaboratorRef, dSpec.CollaboratorRef)
 	if err != nil {
 		return nil, err
 	}
 
 	pkgConfig := &PackageConfig{
-		PackageMetadata: &packageMetadata{
-			CollaboratorName: sSpec.CollaboratorRef,
-			PkgPath:          pkgPath,
-		},
+		CollaboratorName:        sSpec.CollaboratorRef,
+		PkgPath:                 pkgPath,
+		OutpuFolderPath:         filepath.Join(pkgPath, "output"),
 		SourceSpec:              sSpec,
 		TransformationGroupSpec: tSpec,
 		DestinationGroupSpec:    dSpec,

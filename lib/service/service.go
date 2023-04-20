@@ -1,10 +1,10 @@
-// Orchestrator will be a server that will create a collaboration session
+// Service will be a server that will create a collaboration session
 // It will take requests to run collaboration events.
 // A collaboration event can be of type:
 // 		1. Run Transformation.
 // 		2. Download Destination
 
-package orchestrator
+package service
 
 import (
 	"context"

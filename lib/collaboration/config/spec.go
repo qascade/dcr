@@ -1,9 +1,5 @@
 package config
 
-import (
-	"github.com/qascade/dcr/lib/collaboration/address"
-)
-
 type Spec interface{}
 
 type TransformationGroupSpec struct {
@@ -14,14 +10,15 @@ type TransformationGroupSpec struct {
 // For now only supporting Count Query.
 // TODO - Make this Spec such that any type of transformation can be parsed using this spec.
 type TransformationSpec struct {
-	Name            string     `yaml:"name"`
-	Count           string     `yaml:"count"`
-	From            []FromSpec `yaml:"from"`
-	NoiseType       string     `yaml:"noise_type"`
-	NoiseParams     []string   `yaml:"noise_parameters"`
-	JoinKey         string     `yaml:"join_key"`
-	Template        string     `yaml:"template"`
-	ConsumerAllowed []string   `yaml:"consumer_allowed"`
+	Name               string     `yaml:"name"`
+	Count              string     `yaml:"count"`
+	From               []FromSpec `yaml:"from"`
+	NoiseType          string     `yaml:"noise_type"`
+	NoiseParams        []string   `yaml:"noise_parameters"`
+	JoinKey            string     `yaml:"join_key"`
+	Template           string     `yaml:"template"`
+	ConsumerAllowed    []string   `yaml:"consumer_allowed"`
+	DestinationAllowed []string   `yaml:"destination_allowed"`
 }
 
 type SourceGroupSpec struct {
@@ -54,16 +51,16 @@ type DestinationGroupSpec struct {
 }
 
 type DestinationSpec struct {
-	Name string      `yaml:"name"`
-	Ref  address.Ref `yaml:"ref"`
+	Name string `yaml:"name"`
+	Ref  string `yaml:"ref"`
 }
 
-type DestinationAllowedSpec struct {
-	Ref         address.Ref `yaml:"ref"`
-	NoiseParams []any       `yaml:"noise_parameters"`
+type SourceDestinationAllowedSpec struct {
+	Ref         string `yaml:"ref"`
+	NoiseParams []any  `yaml:"noise_parameters"`
 }
 
 type FromSpec struct {
-	Name string      `yaml:"name"`
-	Ref  address.Ref `yaml:"ref"`
+	Name string `yaml:"name"`
+	Ref  string `yaml:"ref"`
 }

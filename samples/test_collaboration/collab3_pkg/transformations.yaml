@@ -19,3 +19,5 @@ transformations:
               ANON_COUNT({{count} CLAMPED {{threshold}}) AS {{name}} FROM {{table1}} join {{table2}} using {{join_key}}
     consumer_allowed: 
       - collab2
+    destination_allowed: 
+      -collab2
