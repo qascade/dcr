@@ -33,7 +33,7 @@ type SourceSpec struct {
 	Columns     []ColumnSpec `yaml:"columns"`
 	// TODO- Do we need to add addressRef here?
 	ConsumersAllowed    []string                 `yaml:"consumers_allowed"`
-	DestinationsAllowed []DestinationAllowedSpec `yaml:"destinations_allowed"`
+	DestinationsAllowed []SourceDestinationAllowedSpec `yaml:"destinations_allowed"`
 }
 
 type ColumnSpec struct {
