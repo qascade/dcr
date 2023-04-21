@@ -13,9 +13,9 @@ type TransformationSpec struct {
 	Name               string     `yaml:"name"`
 	Count              string     `yaml:"count"`
 	From               []FromSpec `yaml:"from"`
+	JoinKey            string     `yaml:"join_key"`
 	NoiseType          string     `yaml:"noise_type"`
 	NoiseParams        []string   `yaml:"noise_parameters"`
-	JoinKey            string     `yaml:"join_key"`
 	Template           string     `yaml:"template"`
 	ConsumerAllowed    []string   `yaml:"consumer_allowed"`
 	DestinationAllowed []string   `yaml:"destination_allowed"`

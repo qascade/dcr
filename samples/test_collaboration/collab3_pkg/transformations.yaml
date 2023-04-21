@@ -20,4 +20,4 @@ transformations:
     consumer_allowed: 
       - collab2
     destination_allowed: 
-      -collab2
+      - collab2

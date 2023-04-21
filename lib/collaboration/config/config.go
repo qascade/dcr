@@ -146,7 +146,7 @@ func (c *ConfigFolder) parseTransformationSpec(path string) (*TransformationGrou
 		return nil, fmt.Errorf("error while marshalling the file: %w", err)
 	}
 	var tResult TransformationGroupSpec
-	err = yaml.Unmarshal(tBytes, &tResult)
+	err = utils.UnmarshalStrict(tBytes, &tResult)
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal to TransformationGroupSpec, %s", transformationYamlPath)
 	}

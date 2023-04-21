@@ -17,7 +17,6 @@ sources:
     destinations_allowed: 
       - ref: /collab3/transformation/collab3_transformation 
         noise_parameters: 
-          - noise_parameters: 
           - epsilon: ln3 
           - delta: 1e-5
           - kappa: 1
