@@ -1,0 +1,6 @@
+go 1.20
+
+use (
+	.
+	./samples/test_collaboration/collab1_pkg/go_app
+)

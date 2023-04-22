@@ -25,10 +25,10 @@ const (
 //DestinationRef : /collaborator_name/destination/destination_table_name
 //TransformationRef : /collaborator_name/transformation/transformation_group_name
 
-func CacheAddresses(collabConfig config.CollaborationConfig) (map[AddressRef]source.Source, map[AddressRef]transformation.Transformation, map[AddressRef]destination.Destination) {
-	cSources := make(map[AddressRef]source.Source)
-	cTransformations := make(map[AddressRef]transformation.Transformation)
-	cDestinations := make(map[AddressRef]destination.Destination)
+func CacheAddresses(collabConfig config.CollaborationConfig) (map[AddressRef]DcrAddress, map[AddressRef]DcrAddress, map[AddressRef]DcrAddress) {
+	cSources := make(map[AddressRef]DcrAddress)
+	cTransformations := make(map[AddressRef]DcrAddress)
+	cDestinations := make(map[AddressRef]DcrAddress)
 
 	for _, pkgConfig := range collabConfig.PackagesInfo {
 		// TODO - Need to create all these address through a AddressFactory
@@ -36,17 +36,23 @@ func CacheAddresses(collabConfig config.CollaborationConfig) (map[AddressRef]sou
 		for _, sSpec := range pkgConfig.SourceSpec.Sources {
 			s := source.NewLocalSource(collaboratorName, sSpec)
 			ref := Abs(sSpec.Name, collaboratorName, ADDRESS_TYPE_SOURCE)
-			cSources[ref] = s
+			sAddress := NewSourceAddress(ref, collaboratorName, getAddressRefSlice(sSpec.ConsumersAllowed), getTransformationRefSlice(sSpec.DestinationsAllowed), s)
+			cSources[ref] = sAddress
 		}
+
 		for _, tSpec := range pkgConfig.TransformationGroupSpec.Transformations {
-			t := transformation.NewGenericPrivateQuery(collaboratorName, tSpec)
-			ref := Abs(tSpec.Name, pkgConfig.CollaboratorName, ADDRESS_TYPE_TRANSFORMATION)
-			cTransformations[ref] = t
+			t := transformation.NewGoApp(collaboratorName, tSpec)
+			ref := Abs(tSpec.Name, collaboratorName, ADDRESS_TYPE_TRANSFORMATION)
+			tAddress := NewTransformationAddress(ref, collaboratorName, getAddressRefSlice(tSpec.ConsumerAllowed), getAddressRefSlice(tSpec.DestinationAllowed), t)
+			cTransformations[ref] = tAddress
 		}
+
 		for _, dSpec := range pkgConfig.DestinationGroupSpec.Destinations {
 			d := destination.NewLocalDestination(collaboratorName, dSpec)
-			ref := Abs(dSpec.Name, pkgConfig.CollaboratorName, ADDRESS_TYPE_DESTINATION)
-			cDestinations[ref] = d
+			ref := Abs(dSpec.Name, collaboratorName, ADDRESS_TYPE_DESTINATION)
+			requester := NewCollaboratorRef(collaboratorName)
+			dAddress := NewDestinationAddress(ref, requester, d)
+			cDestinations[ref] = dAddress
 		}
 	}
 	return cSources, cTransformations, cDestinations

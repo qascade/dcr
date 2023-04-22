@@ -1,21 +1,21 @@
 collaborator: Research
 transformations: 
   - name: private_total_customers # research/tranformation/private_total_count/output
-    count: email 
+    type: go_code
+    app_location: ./go_app
+    unique_id: EMAIL
     from: 
       - name: table1
-        ref: ad_customers 
+        ref: /Airline/source/Airline_customers 
+        location_tag: csvLocation1
       - name: table2
-        ref: /Media/media_customers 
-    join_key: email
-    noise_type: laplace
+        ref: /Media/source/Media_customers 
+        location_tag: csvLocation2
+    noise_type: Laplace()
     noise_parameters: 
       - epsilon 
-      - delta
-      - kappa
-      - threshold
-    template: |
-              SELECT WITH ANONYMIZATION OPTIONS(epsilon={{epsilon}}, delta={{delta}}, kappa={{kappa}})
-              ANON_COUNT({{count} CLAMPED {{threshold}}) AS {{name}} FROM {{table1}} join {{table2}} using {{join_key}}. 
+      - maxPartitionsPerUser
     consumer_allowed: 
       - Media
+    destination_allowed: 
+      - Research # Ideally, transformation owner should not explicitly specify destination permissions.

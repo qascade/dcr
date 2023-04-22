@@ -1,7 +1,9 @@
 collaborator: collab3
 transformations: 
   - name: transformation3 # research/tranformation/private_total_count/output
-    count: email 
+    type: go_code
+    unique_id: email 
+    app_location: ./go_app
     from: 
       - name: table1
         ref: collab1/source/collab1_table
@@ -14,9 +16,6 @@ transformations:
       - delta
       - kappa
       - threshold
-    template: |
-              SELECT WITH ANONYMIZATION OPTIONS(epsilon={{epsilon}}, delta={{delta}}, kappa={{kappa}})
-              ANON_COUNT({{count} CLAMPED {{threshold}}) AS {{name}} FROM {{table1}} join {{table2}} using {{join_key}}
     consumer_allowed: 
       - collab2
     destination_allowed: 

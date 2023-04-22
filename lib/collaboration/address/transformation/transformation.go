@@ -2,9 +2,9 @@
 package transformation
 
 import (
-	"github.com/flosch/pongo2/v6"
-	log "github.com/sirupsen/logrus"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/qascade/dcr/lib/collaboration/config"
 )
@@ -14,54 +14,54 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
-type TransformationType string
-
-type DestinationAllowed interface {
-	Transformation
-}
-
 type Transformation interface {
-	Compile(template pongo2.Template) string
+	Compile() (string, error)
+	GetSourcesInfo() []SourceMetadata
 }
 
-// All Supported Differentially Private Queries must comply to this interface.
-// We may also define some DPQuery templates.
-// But we also need to give support for general DP Query.
+type SourceMetadata struct {
+	SourceName         string
+	LocationPongoInput string
+	AddressRef         string
+}
 
-type GenericPrivateQuery struct {
+// A go binary code that takes lists csv's as input and outputs a list of csv's
+type GoApp struct {
 	CollaboratorName string
-	Query            string
-	template         string
-	tables           []string
-	templateInputs   map[string]string
+	pongoInputs      map[string]string
+	AppLocation      string
+	sourcesInfo      []SourceMetadata
 }
 
-func NewGenericPrivateQuery(cName string, tSpec config.TransformationSpec) Transformation {
-	return &GenericPrivateQuery{
+func NewGoApp(cName string, tSpec config.TransformationSpec) Transformation {
+	pongoInputs := make(map[string]string)
+	pongoInputs["uniqueID"] = tSpec.UniqueId
+	sources := getSourcesFromSpec(tSpec)
+	return &GoApp{
 		CollaboratorName: cName,
-		template:         tSpec.Template,
-		tables:           extractTableRefs(tSpec.From),
-		templateInputs:   createTemplateInputs(tSpec.NoiseParams...),
+		pongoInputs:      pongoInputs,
+		AppLocation:      tSpec.AppLocation,
+		sourcesInfo:      sources,
 	}
 }
 
-func (g *GenericPrivateQuery) Compile(template pongo2.Template) string {
-	log.Info("Compile query for generic private query yet to be implemented.")
-	return ""
+func (ga *GoApp) Compile() (string, error) {
+	return "", nil
 }
 
-func extractTableRefs(from []config.FromSpec) []string {
-	var tables []string
-	for _, table := range from {
-		tables = append(tables, table.Ref)
-	}
-	return tables
+func (ga *GoApp) GetSourcesInfo() []SourceMetadata {
+	return ga.sourcesInfo
 }
 
-func createTemplateInputs(options ...string) map[string]string {
-	templateInputs := make(map[string]string)
-	for _, option := range options {
-		templateInputs[option] = option
+func getSourcesFromSpec(tSpec config.TransformationSpec) []SourceMetadata {
+	var sources []SourceMetadata
+	for _, source := range tSpec.From {
+		metadata := SourceMetadata{
+			SourceName:         source.Name,
+			LocationPongoInput: source.LocationTag,
+			AddressRef:         source.Ref,
+		}
+		sources = append(sources, metadata)
 	}
-	return templateInputs
+	return sources
 }

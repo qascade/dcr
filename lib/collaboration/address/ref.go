@@ -19,7 +19,7 @@ func init() {
 
 // This function will take in the name of the address and the name of the collaborator and return the absolute addressRef
 func Abs(addressName string, collaboratorName string, addType AddressType) AddressRef {
-	return AddressRef(ADDRESS_TYPE_ROOT) + AddressRef(collaboratorName) + AddressRef(addType) + AddressRef(addressName)
+	return AddressRef(ADDRESS_TYPE_ROOT) + AddressRef(collaboratorName) + AddressRef("/") + AddressRef(addType) + AddressRef(addressName)
 }
 
 func NewCollaboratorRef(collaboratorName string) AddressRef {

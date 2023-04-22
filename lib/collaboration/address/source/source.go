@@ -54,6 +54,7 @@ func NewLocalSource(cName string, sPec config.SourceSpec) Source {
 	}
 }
 
+// Need this function to copy the CsvLocation to the go_app
 func (ls *LocalSource) Extract() ([]byte, error) {
 	// Read CSV file
 	csv, err := os.Open(ls.CsvLocation)
@@ -66,4 +67,12 @@ func (ls *LocalSource) Extract() ([]byte, error) {
 		return nil, fmt.Errorf("error while reading the csv file: %v", err)
 	}
 	return csvBytes, nil
+}
+
+func (ls *LocalSource) GetColumns() []Column {
+	return ls.Columns
+}
+
+func (ls *LocalSource) GetCsvLocation() string {
+	return ls.CsvLocation
 }

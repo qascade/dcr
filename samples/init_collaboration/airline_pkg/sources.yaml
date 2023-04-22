@@ -1,6 +1,6 @@
 collaborator: Airline #name of collaborator 
-tables: 
-  - name: Airline_Customers
+sources: 
+  - name: Airline_customers
     csv_location: ./airline_customers.csv
     description: table having data for airline customers
     columns:
@@ -16,14 +16,13 @@ tables:
         type: string 
         masking_type: sha256
         selectable: false
-        aggregates_allowed: none
         join_key: true 
       - name: zip 
         type: string 
+        making_type: none
         selectable: true
         aggregates_allowed: 
           - count 
-        masking_type: none
         join_key: false 
       - name: pets
         type: string 
@@ -33,11 +32,9 @@ tables:
         selectable: true
         join_key: true
     consumers_allowed: # who is allowed to write transformations on my sources. 
-      - research
+      - Research
     destinations_allowed: 
       - ref: /Research/transformation/private_total_customers 
         noise_parameters: 
           - epsilon: ln3 
-          - delta: 1e-5
-          - kappa: 1
-          - threshold: between 0 and 3
+          - maxPartitionPerUser: 1 

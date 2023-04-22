@@ -14,18 +14,24 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
-type Destination interface{}
+type Destination interface {
+	GetTransformationRef() string
+}
 
 type LocalDestination struct {
 	CollaboratorName  string
 	DestinationName   string
-	TransformationRef string
+	transformationRef string
 }
 
 func NewLocalDestination(cName string, dSpec config.DestinationSpec) Destination {
 	return &LocalDestination{
 		CollaboratorName:  cName,
 		DestinationName:   dSpec.Name,
-		TransformationRef: dSpec.Ref,
+		transformationRef: dSpec.Ref,
 	}
+}
+
+func (ld *LocalDestination) GetTransformationRef() string {
+	return ld.transformationRef
 }

@@ -11,12 +11,14 @@ type TransformationGroupSpec struct {
 // TODO - Make this Spec such that any type of transformation can be parsed using this spec.
 type TransformationSpec struct {
 	Name               string     `yaml:"name"`
-	Count              string     `yaml:"count"`
+	Type               string     `yaml:"type"`
+	UniqueId           string     `yaml:"unique_id"`
+	AppLocation        string     `yaml:"app_location"`
 	From               []FromSpec `yaml:"from"`
 	JoinKey            string     `yaml:"join_key"`
-	NoiseType          string     `yaml:"noise_type"`
-	NoiseParams        []string   `yaml:"noise_parameters"`
-	Template           string     `yaml:"template"`
+	NoiseType          string     `yaml:"noise_type,omitempty"`
+	NoiseParams        []string   `yaml:"noise_parameters,omitempty"`
+	Template           string     `yaml:"template,omitempty"`
 	ConsumerAllowed    []string   `yaml:"consumer_allowed"`
 	DestinationAllowed []string   `yaml:"destination_allowed"`
 }
@@ -41,7 +43,7 @@ type ColumnSpec struct {
 	Type              string   `yaml:"type"`
 	MaskingType       string   `yaml:"masking_type"`
 	Selectable        bool     `yaml:"selectable"`
-	AggregatesAllowed []string `yaml:"aggregates_allowed"`
+	AggregatesAllowed []string `yaml:"aggregates_allowed,omitempty"`
 	JoinKey           bool     `yaml:"join_key"`
 }
 
@@ -61,6 +63,7 @@ type SourceDestinationAllowedSpec struct {
 }
 
 type FromSpec struct {
-	Name string `yaml:"name"`
-	Ref  string `yaml:"ref"`
+	Name        string `yaml:"name"`
+	Ref         string `yaml:"ref"`
+	LocationTag string `yaml:"location_tag"`
 }

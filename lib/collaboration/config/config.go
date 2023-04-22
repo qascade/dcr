@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -50,6 +51,9 @@ func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
 			return err
 		}
 		if info.IsDir() {
+			if strings.Contains(path, "go_app") {
+				return filepath.SkipDir
+			}
 			pkgPaths = append(pkgPaths, path)
 		}
 		return nil
@@ -76,25 +80,29 @@ func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
 func (c *ConfigFolder) newPackageConfig(pkgPath string) (*PackageConfig, error) {
 	sSpec, err := c.parseSourceSpec(pkgPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while parsing the source spec: %v, with pkgPath %s", err, pkgPath)
 	}
 	tSpec, err := c.parseTransformationSpec(pkgPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while parsing the transformation spec: %v, with pkgPath %s", err, pkgPath)
 	}
 	dSpec, err := c.parseDestinationSpec(pkgPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while parsing the destination spec: %v, with pkgPath %s", err, pkgPath)
 	}
 
 	log.Infof("Validating the CollaboratorRefs for all the specs, %s", sSpec.CollaboratorRef)
-	_, err = ValidateAllCollaboratorRefsEqual(sSpec.CollaboratorRef, tSpec.CollaboratorRef, dSpec.CollaboratorRef)
+	// _, err = ValidateAllCollaboratorRefsEqual(sSpec.CollaboratorRef, tSpec.CollaboratorRef, dSpec.CollaboratorRef)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	cName, err := getCollaboratorNameFromConfig(sSpec, tSpec, dSpec)
 	if err != nil {
 		return nil, err
 	}
 
 	pkgConfig := &PackageConfig{
-		CollaboratorName:        sSpec.CollaboratorRef,
+		CollaboratorName:        cName,
 		PkgPath:                 pkgPath,
 		OutpuFolderPath:         filepath.Join(pkgPath, "output"),
 		SourceSpec:              sSpec,
@@ -107,7 +115,8 @@ func (c *ConfigFolder) parseSourceSpec(path string) (*SourceGroupSpec, error) {
 	sourceYamlPath := path + "/sources.yaml"
 	sourceSpecB, err := os.ReadFile(sourceYamlPath)
 	if err != nil {
-		return nil, fmt.Errorf("error while reading the file: %w", err)
+		// If the file does not exist, return nil
+		return &SourceGroupSpec{}, nil
 	}
 	sSpec, err := ParseSpec(sourceSpecB, SourceSpecType)
 	if err != nil {
@@ -135,7 +144,8 @@ func (c *ConfigFolder) parseTransformationSpec(path string) (*TransformationGrou
 	transformationYamlPath := path + "/transformations.yaml"
 	transformationSpecB, err := os.ReadFile(transformationYamlPath)
 	if err != nil {
-		return nil, fmt.Errorf("error while reading the file: %w", err)
+		// If the file is not present, then return nil
+		return &TransformationGroupSpec{}, nil
 	}
 	tSpec, err := ParseSpec(transformationSpecB, TransformationSpecType)
 	if err != nil {
@@ -148,7 +158,7 @@ func (c *ConfigFolder) parseTransformationSpec(path string) (*TransformationGrou
 	var tResult TransformationGroupSpec
 	err = utils.UnmarshalStrict(tBytes, &tResult)
 	if err != nil {
-		return nil, fmt.Errorf("unable to unmarshal to TransformationGroupSpec, %s", transformationYamlPath)
+		return nil, fmt.Errorf("unable to unmarshal to TransformationGroupSpec %s", transformationYamlPath)
 	}
 	return &tResult, nil
 }
@@ -157,7 +167,8 @@ func (c *ConfigFolder) parseDestinationSpec(path string) (*DestinationGroupSpec,
 	destinationYamlPath := path + "/destinations.yaml"
 	destinationSpecB, err := os.ReadFile(destinationYamlPath)
 	if err != nil {
-		return nil, fmt.Errorf("error while reading the file: %w", err)
+		// If the file is not present, then return nil
+		return &DestinationGroupSpec{}, nil
 	}
 	dSpec, err := ParseSpec(destinationSpecB, DestinationSpecType)
 	if err != nil {
@@ -199,4 +210,17 @@ func ParseSpec(yamlBytes []byte, specType SpecType) (Spec, error) {
 		return bs, fmt.Errorf("error parsing yaml.  Parse result:\n%s\nParse error:%s", partialSpecYaml, err)
 	}
 	return bs, err
+}
+
+func getCollaboratorNameFromConfig(sSpec *SourceGroupSpec, tSpec *TransformationGroupSpec, dSpec *DestinationGroupSpec) (string, error) {
+	if sSpec != nil && sSpec.CollaboratorRef != "" {
+		return sSpec.CollaboratorRef, nil
+	}
+	if tSpec != nil && tSpec.CollaboratorRef != "" {
+		return tSpec.CollaboratorRef, nil
+	}
+	if dSpec != nil && dSpec.CollaboratorRef != "" {
+		return dSpec.CollaboratorRef, nil
+	}
+	return "", fmt.Errorf("unable to find the collaborator name in the config")
 }
