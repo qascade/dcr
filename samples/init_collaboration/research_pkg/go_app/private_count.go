@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"math"
 
 	"github.com/google/differential-privacy/go/v2/dpagg"
 	"github.com/google/differential-privacy/go/v2/noise"
@@ -72,9 +73,9 @@ func joinUniqueIds(loc1 string, loc2 string, UniqueID string) ([]string, []strin
 func CalculatePrivateCount(unique_id_list1, unique_id_list2 []string) (int64, int64, error){
 	var count int64 = 0
 	privateCount, err := dpagg.NewCount(&dpagg.CountOptions{
-		Noise: noise.{{noiseType}},
-		Epsilon: {{epsilon}},
-		MaxPartitionsContributed: {{maxPartitionsContributed}},
+		Noise: noise.Laplace(),
+		Epsilon: math.Log(2),
+		MaxPartitionsContributed: 1,
 	})
 	if err != nil {
 		return -1, -1, err
@@ -111,10 +112,9 @@ func writeToCSV(count int64, privateCountResult int64, outputFolderLocation stri
 
 //nolint
 func main() {
-	csvlocation1 := "{{csvLocation1}}"
-	csvlocation1 := "{{csvLocation2}}}"
-	//outputFolderLocation := "{{outputFolderLocation}}"
-	unique_Id := "{{uniqueId}}}"
+	csvlocation1 := "./test1.csv"
+	csvlocation2 := "./test2.csv"
+	unique_Id := "EMAIL"
 	unique_id_list1, unique_id_list2, err := joinUniqueIds(csvlocation1, csvlocation2, unique_Id)
 	if err != nil {
 		panic(err)

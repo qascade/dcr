@@ -15,8 +15,9 @@ func init() {
 }
 
 type Transformation interface {
-	Compile() (string, error)
 	GetSourcesInfo() []SourceMetadata
+	GetPongoInputs() map[string]string
+	AppLocation() string
 }
 
 type SourceMetadata struct {
@@ -29,7 +30,7 @@ type SourceMetadata struct {
 type GoApp struct {
 	CollaboratorName string
 	pongoInputs      map[string]string
-	AppLocation      string
+	appLocation      string
 	sourcesInfo      []SourceMetadata
 }
 
@@ -40,19 +41,22 @@ func NewGoApp(cName string, tSpec config.TransformationSpec) Transformation {
 	return &GoApp{
 		CollaboratorName: cName,
 		pongoInputs:      pongoInputs,
-		AppLocation:      tSpec.AppLocation,
+		appLocation:      tSpec.AppLocation,
 		sourcesInfo:      sources,
 	}
-}
-
-func (ga *GoApp) Compile() (string, error) {
-	return "", nil
 }
 
 func (ga *GoApp) GetSourcesInfo() []SourceMetadata {
 	return ga.sourcesInfo
 }
 
+func (ga *GoApp) GetPongoInputs() map[string]string {
+	return ga.pongoInputs
+}
+
+func (ga *GoApp) AppLocation() string {
+	return ga.appLocation
+}
 func getSourcesFromSpec(tSpec config.TransformationSpec) []SourceMetadata {
 	var sources []SourceMetadata
 	for _, source := range tSpec.From {

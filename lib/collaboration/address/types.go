@@ -35,6 +35,7 @@ func CacheAddresses(collabConfig config.CollaborationConfig) (map[AddressRef]Dcr
 		collaboratorName := pkgConfig.CollaboratorName
 		for _, sSpec := range pkgConfig.SourceSpec.Sources {
 			s := source.NewLocalSource(collaboratorName, sSpec)
+			//noiseParams := extractNoiseParams(sSpec)
 			ref := Abs(sSpec.Name, collaboratorName, ADDRESS_TYPE_SOURCE)
 			sAddress := NewSourceAddress(ref, collaboratorName, getAddressRefSlice(sSpec.ConsumersAllowed), getTransformationRefSlice(sSpec.DestinationsAllowed), s)
 			cSources[ref] = sAddress
@@ -57,3 +58,11 @@ func CacheAddresses(collabConfig config.CollaborationConfig) (map[AddressRef]Dcr
 	}
 	return cSources, cTransformations, cDestinations
 }
+
+// func extractNoiseParams(sSpec config.SourceSpec) map[AddressRef]map[string]interface{} {
+// 	noiseParams := make(map[AddressRef]map[string]interface{})
+// 	for _, dest := range sSpec.DestinationsAllowed {
+// 		noiseParams[AddressRef(dest.Ref)] = dest.NoiseParams
+// 	}
+// 	return noiseParams
+// }

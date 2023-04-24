@@ -12,21 +12,38 @@ import (
 )
 
 func TestCollaboration(t *testing.T) {
+	fmt.Println("Running TestCollaboration")
 	collabConfig := testConfig(t)
-	graph := testAddressGraph(t, collabConfig)
-	testAuthorization(t, graph)
+	collaboration := testAddressGraph(t, collabConfig)
+	testAuthorization(t, collaboration)
 }
 
-func testAuthorization(t *testing.T, graph *address.Graph) {
+func testAuthorization(t *testing.T, collaboration *Collaboration) {
+	/* test 1 */
+	destRequester := address.AddressRef("/Research")
+	destination := address.AddressRef("/Research/destination/customer_overlap_count")
+
+	allowed, err := collaboration.AuthorizeCollaborationEvent(destRequester, destination)
+	require.NoError(t, err)
+	require.Equal(t, true, allowed)
+
+	/*test 2 */
+	transformationRunner := address.AddressRef("/Media")
+	transformation := address.AddressRef("/Research/transformation/total_customers")
+
+	allowed, err = collaboration.AuthorizeCollaborationEvent(transformationRunner, transformation)
+	require.NoError(t, err)
+	require.Equal(t, true, allowed)
 }
 
-func testAddressGraph(t *testing.T, collabConfig *config.CollaborationConfig) *address.Graph {
+func testAddressGraph(t *testing.T, collabConfig *config.CollaborationConfig) *Collaboration {
+	fmt.Println("Running TestAddressGraph")
 	collaboration, err := NewCollaboration(*collabConfig)
 	require.NoError(t, err)
 	fmt.Println("AddressGraph =============")
 	fmt.Println(*collaboration.AddressGraph)
 	require.NotNil(t, collaboration.AddressGraph)
-	return collaboration.AddressGraph
+	return collaboration
 }
 
 func testConfig(t *testing.T) *config.CollaborationConfig {

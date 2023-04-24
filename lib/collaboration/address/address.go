@@ -23,6 +23,7 @@ type Graph struct {
 
 func NewGraph(cSources map[AddressRef]DcrAddress, cTransformations map[AddressRef]DcrAddress, cDestinations map[AddressRef]DcrAddress) (*Graph, error) {
 	log.Info("Graph is being populated...")
+
 	adjList := make(map[AddressRef][]AddressRef)
 	for tRef, tAddressI := range cTransformations {
 		tAddress, ok := tAddressI.(*TransformationAddress)
@@ -48,6 +49,7 @@ func NewGraph(cSources map[AddressRef]DcrAddress, cTransformations map[AddressRe
 		}
 		adjList[dRef] = append(adjList[dRef], AddressRef(dAddress.Destination.GetTransformationRef()))
 	}
+
 	graph := &Graph{
 		AdjacencyList: adjList,
 	}
@@ -56,7 +58,7 @@ func NewGraph(cSources map[AddressRef]DcrAddress, cTransformations map[AddressRe
 
 // All AddressNodeTypes must implement this interface
 type DcrAddress interface {
-	Authorize(AddressRef) (bool, error) // Is a Collaborator Allowed to Move further into the graph.
+	Authorize(AddressRef, AddressRef) (bool, error) // Is a Collaborator Allowed to Move further into the graph.
 	//Deref  // Function that returns the real transformation
 	Type() AddressType // Returns the type of Address.
 }
@@ -67,6 +69,7 @@ type SourceAddress struct {
 	Owner               AddressRef //CollaboratorName
 	ConsumersAllowed    []AddressRef
 	DestinationsAllowed []AddressRef
+	NoiseParams         map[AddressRef]map[string]interface{}
 }
 
 func NewSourceAddress(ref AddressRef, owner string, consumersAllowed []AddressRef, destAllowed []AddressRef, source source.Source) DcrAddress {
@@ -80,9 +83,28 @@ func NewSourceAddress(ref AddressRef, owner string, consumersAllowed []AddressRe
 		Source:              source,
 	}
 }
-func (sa *SourceAddress) Authorize(collabName AddressRef) (bool, error) {
-	log.Info("Authorize for SourceAddress still needs to be implemented")
-	return true, nil
+
+func (sa *SourceAddress) Authorize(collabName AddressRef, tName AddressRef) (bool, error) {
+	log.Infof("Collaborator %s is trying to consume source %s, Performing authorization", collabName, sa.Ref)
+	collabAllowed := false
+	destAllowed := false
+	for _, allowedCollab := range sa.ConsumersAllowed {
+		if collabName == NewCollaboratorRef(string(allowedCollab)) {
+			collabAllowed = true
+		}
+	}
+	for _, allowedDest := range sa.DestinationsAllowed {
+		if tName == allowedDest {
+			destAllowed = true
+		}
+	}
+	if collabAllowed && destAllowed {
+		log.Infof("Collaborator %s is allowed to consume source %s. Authorization Successful", collabName, sa.Ref)
+		return true, nil
+	}
+	err := fmt.Errorf("collaborator %s is not allowed to consume source %s", collabName, sa.Ref)
+	log.Error(err)
+	return false, err
 }
 
 func (sa *SourceAddress) Type() AddressType {
@@ -109,9 +131,29 @@ func NewTransformationAddress(ref AddressRef, owner string, consumersAllowed []A
 		Transformation:      t,
 	}
 }
-func (ta *TransformationAddress) Authorize(collabName AddressRef) (bool, error) {
-	log.Info("Authorize for Transformation Address still needs to be implemented")
-	return true, nil
+func (ta *TransformationAddress) Authorize(collabName AddressRef, _ AddressRef) (bool, error) {
+	log.Infof("Collaborator %s is trying to consume transformation %s, Performing authorization", collabName, ta.Ref)
+	collabAllowed := false
+	destAllowed := false
+
+	for _, allowedCollab := range ta.ConsumersAllowed {
+		if collabName == allowedCollab {
+			collabAllowed = true
+		}
+	}
+	for _, allowedDest := range ta.DestinationsAllowed {
+		if collabName == allowedDest {
+			destAllowed = true
+		}
+	}
+
+	if collabAllowed && destAllowed {
+		log.Infof("Collaborator %s is allowed to consume transformation %s. Authorization Successful", collabName, ta.Ref)
+		return true, nil
+	}
+	err := fmt.Errorf("collaborator %s is not allowed to consume transformation %s", collabName, ta.Ref)
+	log.Error(err)
+	return false, err
 }
 
 func (ta *TransformationAddress) Type() AddressType {
@@ -132,8 +174,9 @@ func NewDestinationAddress(ref AddressRef, requester AddressRef, dest destinatio
 	}
 }
 
-func (da *DestinationAddress) Authorize(collabName AddressRef) (bool, error) {
-	log.Info("Authorize for destination still needs to be implemented")
+func (da *DestinationAddress) Authorize(collabName AddressRef, _ AddressRef) (bool, error) {
+	// Movement from destination is always authorized.
+	log.Infof("Collaborator %s is trying to consume destination %s, Performing authorization", collabName, da.Ref)
 	return true, nil
 }
 
