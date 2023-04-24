@@ -1,10 +1,8 @@
 collaborator: collab2 #name of collaborator 
-tables: 
+sources: 
   - name: collab2_table
     csv_location: ./collab2_location_csv.csv
     description: table having data for media customer
-    consumers_allowed: # who is allowed to use this source in transformation
-      - collab3
     columns:
       - name: email 
         type: string
@@ -14,13 +12,12 @@ tables:
           - aggregate2
           - aggregate4  
         join_key: true # can this column be used as a join_key
-destinations_allowed: 
-  - ref: /collab3/transformation/collab3_transformation 
-    tables_allowed: 
-      - /collab2/source/collab2_table 
-    noise_parameters: 
-      - noise_parameters: 
-      - epsilon: ln3 
-      - delta: 1e-5
-      - kappa: 1
-      - threshold: between 0 and 3  
+    consumers_allowed: # who is allowed to use this source in transformation
+      - collab3
+    destinations_allowed: 
+      - ref: /collab3/transformation/collab3_transformation 
+        noise_parameters: 
+          - epsilon: ln3 
+          - delta: 1e-5
+          - kappa: 1
+          - threshold: between 0 and 3  

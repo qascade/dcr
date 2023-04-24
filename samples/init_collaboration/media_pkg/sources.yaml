@@ -1,10 +1,8 @@
 collaborator: Media #name of collaborator 
-tables: 
-  - name: media_customers
+sources: 
+  - name: Media_customers
     csv_location: ./media_customers.csv
     description: table having data for media customer
-    consumers_allowed: # who is allowed to use this source in transformation
-      - research
     columns:
       - name: email 
         type: string
@@ -18,7 +16,6 @@ tables:
         type: string 
         masking_type: sha256
         selectable: false
-        aggregates_allowed: none
         join_key: true 
       - name: zip 
         type: string 
@@ -35,13 +32,10 @@ tables:
           - std_dev
         selectable: true
         join_key: false
-destinations_allowed: 
-  - ref: /Research/transformation/private_total_customers 
-    tables_allowed: 
-      - /Media/source/media_customers 
-    noise_parameters: 
-      - noise_parameters: 
-      - epsilon: ln3 
-      - delta: 1e-5
-      - kappa: 1
-      - threshold: between 0 and 3  
+    consumers_allowed: # who is allowed to use this source in transformation
+      - Research
+    destinations_allowed: 
+      - ref: /Research/transformation/private_total_customers 
+        noise_parameters: 
+          - epsilon: ln3 
+          - maxPartitionsPerUser: 1

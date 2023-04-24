@@ -1,5 +1,4 @@
-collaborator: Research
+collaborator: collab3
 destinations: 
   - name: customer_overlap_count
-    request: collab1
-    transformation_ref: /collab3/transformation/transformation3
+    ref: /collab3/transformation/transformation3

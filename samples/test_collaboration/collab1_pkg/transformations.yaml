@@ -1,7 +1,9 @@
 collaborator: collab1
 transformations: 
   - name: transformation1 # research/tranformation/private_total_count/output
-    count: email 
+    type: go_code
+    app_location: ./go_app
+    unique_id: email 
     from: 
       - name: table1
         ref: /collab3/source/collab1_table 
@@ -11,11 +13,11 @@ transformations:
     noise_type: laplace
     noise_parameters: 
       - epsilon 
-      - delta
-      - kappa
-      - threshold
-    template: |
-              SELECT WITH ANONYMIZATION OPTIONS(epsilon={{epsilon}}, delta={{delta}}, kappa={{kappa}})
-              ANON_COUNT({{count} CLAMPED {{threshold}}) AS {{name}} FROM {{table1}} join {{table2}} using {{join_key}}
+      - maxPartitionsPerUser
+    #  - delta
+    #  - kappa
+    #  - threshold
     consumer_allowed: 
+      - collab2
+    destination_allowed: 
       - collab2
