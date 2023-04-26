@@ -9,6 +9,7 @@ import (
 
 	"github.com/qascade/dcr/lib/collaboration/address"
 	"github.com/qascade/dcr/lib/collaboration/config"
+	"github.com/qascade/dcr/lib/service"
 )
 
 func TestCollaboration(t *testing.T) {

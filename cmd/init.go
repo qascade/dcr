@@ -73,7 +73,6 @@ func generateCollabFiles(destPath string) error {
 	}
 
 	return writeFilesToGivenOutputDir(outputDir, contractFile, collaborator1_tables, collaborator2_tables)
-
 }
 
 // writing files to new directory, files data is fetched at runtime using embed package
