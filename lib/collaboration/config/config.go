@@ -131,11 +131,8 @@ func (c *ConfigFolder) parseSourceSpec(path string) (*SourceGroupSpec, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal to SourceGroupSpec, %s", sourceYamlPath)
 	}
-	for _, sourceSpec := range sResult.Sources {
-		sourceSpec.CSVLocation, err = filepath.Abs(sourceSpec.CSVLocation)
-		if err != nil {
-			return nil, fmt.Errorf("unable to get the absolute path of the csv file: %w", err)
-		}
+	for i, sourceSpec := range sResult.Sources {
+		sResult.Sources[i].CSVLocation = filepath.Join(path, sourceSpec.CSVLocation)
 	}
 	return &sResult, nil
 }
@@ -159,6 +156,9 @@ func (c *ConfigFolder) parseTransformationSpec(path string) (*TransformationGrou
 	err = utils.UnmarshalStrict(tBytes, &tResult)
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal to TransformationGroupSpec %s", transformationYamlPath)
+	}
+	for i, tSpec := range tResult.Transformations {
+		tResult.Transformations[i].AppLocation = filepath.Join(path, tSpec.AppLocation)
 	}
 	return &tResult, nil
 }

@@ -2,7 +2,6 @@
 package source
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/qascade/dcr/lib/collaboration/config"
@@ -16,7 +15,7 @@ func init() {
 
 // All source types must implement this interface.
 type Source interface {
-	Extract() ([]byte, error)
+	Extract() string
 }
 
 type Column struct {
@@ -55,18 +54,8 @@ func NewLocalSource(cName string, sPec config.SourceSpec) Source {
 }
 
 // Need this function to copy the CsvLocation to the go_app
-func (ls *LocalSource) Extract() ([]byte, error) {
-	// Read CSV file
-	csv, err := os.Open(ls.CsvLocation)
-	var csvBytes []byte
-	if err != nil {
-		return nil, fmt.Errorf("error while opening the csv file: %v", err)
-	}
-	_, err = csv.Read(csvBytes)
-	if err != nil {
-		return nil, fmt.Errorf("error while reading the csv file: %v", err)
-	}
-	return csvBytes, nil
+func (ls *LocalSource) Extract() string {
+	return ls.CsvLocation
 }
 
 func (ls *LocalSource) GetColumns() []Column {

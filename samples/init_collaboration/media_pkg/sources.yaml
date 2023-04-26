@@ -37,5 +37,6 @@ sources:
     destinations_allowed: 
       - ref: /Research/transformation/private_total_customers 
         noise_parameters: 
-          - epsilon: ln3 
+          - noiseType: Laplace
+          - epsilon: math.Log(2) 
           - maxPartitionsPerUser: 1

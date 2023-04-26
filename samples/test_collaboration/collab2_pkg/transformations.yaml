@@ -9,7 +9,6 @@ transformations:
       - name: table2
         ref: /collab2/source/collab2_table 
     join_key: email
-    noise_type: laplace
     noise_parameters: 
       - epsilon 
       - delta

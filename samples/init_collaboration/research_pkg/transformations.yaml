@@ -1,6 +1,6 @@
 collaborator: Research
 transformations: 
-  - name: private_total_customers # research/tranformation/private_total_count/output
+  - name: private_total_customers # /Research/tranformation/private_total_customers
     type: go_code
     app_location: ./go_app
     unique_id: EMAIL
@@ -11,11 +11,9 @@ transformations:
       - name: table2
         ref: /Media/source/Media_customers 
         location_tag: csvLocation2
-    noise_type: Laplace()
     noise_parameters: 
+      - noiseType
       - epsilon 
       - maxPartitionsPerUser
     consumer_allowed: 
       - Media
-    destination_allowed: 
-      - Research # Ideally, transformation owner should not explicitly specify destination permissions.

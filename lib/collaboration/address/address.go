@@ -69,10 +69,10 @@ type SourceAddress struct {
 	Owner               AddressRef //CollaboratorName
 	ConsumersAllowed    []AddressRef
 	DestinationsAllowed []AddressRef
-	NoiseParams         map[AddressRef]map[string]interface{}
+	SourceNoises        map[AddressRef]map[string]string
 }
 
-func NewSourceAddress(ref AddressRef, owner string, consumersAllowed []AddressRef, destAllowed []AddressRef, source source.Source) DcrAddress {
+func NewSourceAddress(ref AddressRef, owner string, consumersAllowed []AddressRef, destAllowed []AddressRef, source source.Source, sourceNoises map[AddressRef]map[string]string) DcrAddress {
 	// Owner is always allowed to consume its own source.
 	consumersAllowed = append(consumersAllowed, NewCollaboratorRef(owner))
 	return &SourceAddress{
@@ -81,6 +81,7 @@ func NewSourceAddress(ref AddressRef, owner string, consumersAllowed []AddressRe
 		ConsumersAllowed:    consumersAllowed,
 		DestinationsAllowed: destAllowed,
 		Source:              source,
+		SourceNoises:        sourceNoises,
 	}
 }
 
@@ -117,9 +118,11 @@ type TransformationAddress struct {
 	ConsumersAllowed    []AddressRef
 	DestinationsAllowed []AddressRef
 	Transformation      transformation.Transformation
+	NoiseParams         []string
+	NoiseType           string
 }
 
-func NewTransformationAddress(ref AddressRef, owner string, consumersAllowed []AddressRef, destAllowed []AddressRef, t transformation.Transformation) DcrAddress {
+func NewTransformationAddress(ref AddressRef, owner string, consumersAllowed []AddressRef, destAllowed []AddressRef, t transformation.Transformation, noiseParams []string) DcrAddress {
 	// Owner is always allowed to consume its own transformation.
 	consumersAllowed = append(consumersAllowed, NewCollaboratorRef(owner))
 	destAllowed = append(destAllowed, NewCollaboratorRef(owner))
@@ -129,6 +132,7 @@ func NewTransformationAddress(ref AddressRef, owner string, consumersAllowed []A
 		ConsumersAllowed:    consumersAllowed,
 		DestinationsAllowed: destAllowed,
 		Transformation:      t,
+		NoiseParams:         noiseParams,
 	}
 }
 func (ta *TransformationAddress) Authorize(collabName AddressRef, _ AddressRef) (bool, error) {
