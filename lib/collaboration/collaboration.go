@@ -2,8 +2,8 @@ package collaboration
 
 import (
 	"fmt"
-	"os"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -223,7 +223,7 @@ func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, er
 
 	csvLocation1 := pongoInputs["csvLocation1"]
 	csvLocation2 := pongoInputs["csvLocation2"]
-	// Copying the csv's to the go_app folder. 
+	// Copying the csv's to the go_app folder.
 	csvFile1, err := os.Open(csvLocation1)
 	if err != nil {
 		return "", fmt.Errorf("error while opening the csv file: %v", err)
@@ -243,7 +243,7 @@ func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, er
 		return "", fmt.Errorf("error while creating the csv file: %v", err)
 	}
 	defer newCsV1.Close()
-	
+
 	newCsv2, err := os.Create(newCsV2Path)
 	if err != nil {
 		return "", fmt.Errorf("error while creating the csv file: %v", err)
@@ -251,17 +251,16 @@ func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, er
 	defer newCsv2.Close()
 	log.Infof("Writing the csv files to %s and %s", newCsV1Path, newCsV2Path)
 	_, err = io.Copy(newCsV1, csvFile1)
-    if err != nil {
-        log.Fatal(err)
+	if err != nil {
+		log.Fatal(err)
 		return "", err
-    }
-	
+	}
+
 	_, err = io.Copy(newCsv2, csvFile2)
 	if err != nil {
 		log.Fatal(err)
 		return "", err
 	}
 
-	
 	return compiledMainPath, nil
 }
