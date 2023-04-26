@@ -3,6 +3,7 @@ package collaboration
 import (
 	"fmt"
 	"os"
+	"io"
 	"path/filepath"
 	"strings"
 
@@ -195,6 +196,10 @@ func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, er
 	for k, v := range pongoInputs {
 		ctx[k] = v
 	}
+	// Hardcoding the csv into pongo inputs
+	ctx["csvLocation1"] = "./test1.csv"
+	ctx["csvLocation2"] = "./test2.csv"
+
 	mainFilePath := filepath.Join(appLocation, "main.tpl")
 	tpl, err := pongo2.FromFile(mainFilePath)
 	if err != nil {
@@ -210,9 +215,53 @@ func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, er
 		return "", fmt.Errorf("error while creating the main.go file: %v", err)
 	}
 	log.Infof("Writing the compiled main.go file to %s", compiledMainPath)
+
 	_, err = compiledMain.WriteString(output)
 	if err != nil {
-		return "", fmt.Errorf("error while writing to the main.go file: %v", err)
+		return "", fmt.Errorf("error while writing the main.go file: %v", err)
 	}
+
+	csvLocation1 := pongoInputs["csvLocation1"]
+	csvLocation2 := pongoInputs["csvLocation2"]
+	// Copying the csv's to the go_app folder. 
+	csvFile1, err := os.Open(csvLocation1)
+	if err != nil {
+		return "", fmt.Errorf("error while opening the csv file: %v", err)
+	}
+	defer csvFile1.Close()
+
+	csvFile2, err := os.Open(csvLocation2)
+	if err != nil {
+		return "", fmt.Errorf("error while opening the csv file: %v", err)
+	}
+	defer csvFile2.Close()
+
+	newCsV1Path := filepath.Join(appLocation, "test1.csv")
+	newCsV2Path := filepath.Join(appLocation, "test2.csv")
+	newCsV1, err := os.Create(newCsV1Path)
+	if err != nil {
+		return "", fmt.Errorf("error while creating the csv file: %v", err)
+	}
+	defer newCsV1.Close()
+	
+	newCsv2, err := os.Create(newCsV2Path)
+	if err != nil {
+		return "", fmt.Errorf("error while creating the csv file: %v", err)
+	}
+	defer newCsv2.Close()
+	log.Infof("Writing the csv files to %s and %s", newCsV1Path, newCsV2Path)
+	_, err = io.Copy(newCsV1, csvFile1)
+    if err != nil {
+        log.Fatal(err)
+		return "", err
+    }
+	
+	_, err = io.Copy(newCsv2, csvFile2)
+	if err != nil {
+		log.Fatal(err)
+		return "", err
+	}
+
+	
 	return compiledMainPath, nil
 }
