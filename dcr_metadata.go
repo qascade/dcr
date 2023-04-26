@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	DCR_VERSION       string = "0.0.1"
+	DCR_VERSION       string = "0.0.3"
 	DCR_ENV_FILE_NAME string = ".env"
 	DCR_DIR_NAME      string = ".dcr"
 )

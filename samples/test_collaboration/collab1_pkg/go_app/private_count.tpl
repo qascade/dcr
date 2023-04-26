@@ -72,7 +72,7 @@ func joinUniqueIds(loc1 string, loc2 string, UniqueID string) ([]string, []strin
 func CalculatePrivateCount(unique_id_list1, unique_id_list2 []string) (int64, int64, error){
 	var count int64 = 0
 	privateCount, err := dpagg.NewCount(&dpagg.CountOptions{
-		Noise: noise.{{noiseType}},
+		Noise: noise.{{noiseType}}(),
 		Epsilon: {{epsilon}},
 		MaxPartitionsContributed: {{maxPartitionsContributed}},
 	})

@@ -37,14 +37,14 @@ func CacheAddresses(collabConfig config.CollaborationConfig) (map[AddressRef]Dcr
 			s := source.NewLocalSource(collaboratorName, sSpec)
 			//noiseParams := extractNoiseParams(sSpec)
 			ref := Abs(sSpec.Name, collaboratorName, ADDRESS_TYPE_SOURCE)
-			sAddress := NewSourceAddress(ref, collaboratorName, getAddressRefSlice(sSpec.ConsumersAllowed), getTransformationRefSlice(sSpec.DestinationsAllowed), s)
+			sAddress := NewSourceAddress(ref, collaboratorName, getAddressRefSlice(sSpec.ConsumersAllowed), getTransformationRefSlice(sSpec.DestinationsAllowed), s, registerSourceNoises(sSpec.DestinationsAllowed))
 			cSources[ref] = sAddress
 		}
 
 		for _, tSpec := range pkgConfig.TransformationGroupSpec.Transformations {
 			t := transformation.NewGoApp(collaboratorName, tSpec)
 			ref := Abs(tSpec.Name, collaboratorName, ADDRESS_TYPE_TRANSFORMATION)
-			tAddress := NewTransformationAddress(ref, collaboratorName, getAddressRefSlice(tSpec.ConsumerAllowed), getAddressRefSlice(tSpec.DestinationAllowed), t)
+			tAddress := NewTransformationAddress(ref, collaboratorName, getAddressRefSlice(tSpec.ConsumerAllowed), getAddressRefSlice(tSpec.DestinationAllowed), t, tSpec.NoiseParams)
 			cTransformations[ref] = tAddress
 		}
 
@@ -59,10 +59,17 @@ func CacheAddresses(collabConfig config.CollaborationConfig) (map[AddressRef]Dcr
 	return cSources, cTransformations, cDestinations
 }
 
-// func extractNoiseParams(sSpec config.SourceSpec) map[AddressRef]map[string]interface{} {
-// 	noiseParams := make(map[AddressRef]map[string]interface{})
-// 	for _, dest := range sSpec.DestinationsAllowed {
-// 		noiseParams[AddressRef(dest.Ref)] = dest.NoiseParams
-// 	}
-// 	return noiseParams
-// }
+func registerSourceNoises(sourceNoises []config.SourceDestinationAllowedSpec) map[AddressRef]map[string]string {
+	noiseMap := make(map[AddressRef]map[string]string)
+	for _, sourceNoise := range sourceNoises {
+		noiseMapList := sourceNoise.NoiseParams
+		singleNoiseMap := make(map[string]string)
+		for _, noiseMap := range noiseMapList {
+			for k, v := range noiseMap {
+				singleNoiseMap[k] = v
+			}
+		}
+		noiseMap[AddressRef(sourceNoise.Ref)] = singleNoiseMap
+	}
+	return noiseMap
+}

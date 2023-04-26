@@ -38,6 +38,7 @@ func NewGoApp(cName string, tSpec config.TransformationSpec) Transformation {
 	pongoInputs := make(map[string]string)
 	pongoInputs["uniqueID"] = tSpec.UniqueId
 	sources := getSourcesFromSpec(tSpec)
+	registerNoiseParams(tSpec, pongoInputs, sources)
 	return &GoApp{
 		CollaboratorName: cName,
 		pongoInputs:      pongoInputs,
@@ -68,4 +69,14 @@ func getSourcesFromSpec(tSpec config.TransformationSpec) []SourceMetadata {
 		sources = append(sources, metadata)
 	}
 	return sources
+}
+
+func registerNoiseParams(tSpec config.TransformationSpec, pongoInputs map[string]string, sources []SourceMetadata) {
+	for _, noiseParam := range tSpec.NoiseParams {
+		// These will be populated by transformation runner.
+		pongoInputs[noiseParam] = ""
+	}
+	for _, source := range sources {
+		pongoInputs[source.LocationPongoInput] = ""
+	}
 }

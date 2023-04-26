@@ -1,18 +1,16 @@
-// nolint
 package main
 
 import (
 	"encoding/csv"
 	"fmt"
-	"io"
 	"math"
+	"io"
 	"os"
 
 	"github.com/google/differential-privacy/go/v2/dpagg"
 	"github.com/google/differential-privacy/go/v2/noise"
 )
 
-// nolint
 func extractUniqueId(loc string, UniqueID string) ([]string, error) {
 	unique_id_list := []string{}
 	// Open the csv file
@@ -21,10 +19,10 @@ func extractUniqueId(loc string, UniqueID string) ([]string, error) {
 		fmt.Println(err)
 	}
 	defer csvFile.Close()
-
+	
 	// Read the csv file
 	r := csv.NewReader(csvFile)
-
+	
 	// Iterate through the csv file
 	firstLine := true
 	uniqueIdx := -1 // Index of the column with name UniqueID
@@ -54,28 +52,27 @@ func extractUniqueId(loc string, UniqueID string) ([]string, error) {
 }
 
 // This function just combines all the unique ids from the two csv files
-// nolint
+//nolint
 func joinUniqueIds(loc1 string, loc2 string, UniqueID string) ([]string, []string, error) {
 	// Open the first csv file
 	// Combine The values of col with name UniqueId from both the csv files
 	list1, err := extractUniqueId(loc1, UniqueID)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil,err
 	}
 	list2, err := extractUniqueId(loc2, UniqueID)
 	if err != nil {
 		return nil, nil, err
 	}
-	return list1, list2, nil
+	return list1, list2,nil
 }
 
-// nolint
-func CalculatePrivateCount(unique_id_list1, unique_id_list2 []string) (int64, int64, error) {
+func CalculatePrivateCount(unique_id_list1, unique_id_list2 []string) (int64, int64, error){
 	var count int64 = 0
 	privateCount, err := dpagg.NewCount(&dpagg.CountOptions{
-		Noise:                    noise.Laplace(),
-		Epsilon:                  math.Log(2),
-		MaxPartitionsContributed: 1,
+		Noise: noise.{{noiseType}}(),
+		Epsilon: {{epsilon}},
+		MaxPartitionsContributed: {{maxPartitionsPerUser}},
 	})
 	if err != nil {
 		return -1, -1, err
@@ -84,19 +81,18 @@ func CalculatePrivateCount(unique_id_list1, unique_id_list2 []string) (int64, in
 	for _, x := range unique_id_list1 {
 		for _, y := range unique_id_list2 {
 			if x == y {
-				count++
+				count++;
 				privateCount.Increment()
 			}
 		}
 	}
-	result, err := privateCount.Result()
+	result, err  := privateCount.Result()
 	if err != nil {
 		return -1, -1, err
 	}
-	return count, result, nil
+	return count, result,  nil
 }
 
-// nolint
 func writeToCSV(count int64, privateCountResult int64, outputFolderLocation string) {
 	// Create a new file
 	file, err := os.Create(outputFolderLocation + "/output.csv")
@@ -110,11 +106,12 @@ func writeToCSV(count int64, privateCountResult int64, outputFolderLocation stri
 	file.WriteString(fmt.Sprintf("%d, %d\n", count, privateCountResult))
 }
 
-// nolint
+//nolint
 func main() {
-	csvlocation1 := "./test1.csv"
-	csvlocation2 := "./test2.csv"
-	unique_Id := "EMAIL"
+	csvlocation1 := "{{csvLocation1}}"
+	csvlocation2 := "{{csvLocation2}}}"
+	//outputFolderLocation := "{{outputFolderLocation}}"
+	unique_Id := "{{uniqueID}}"
 	unique_id_list1, unique_id_list2, err := joinUniqueIds(csvlocation1, csvlocation2, unique_Id)
 	if err != nil {
 		panic(err)

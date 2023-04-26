@@ -3,8 +3,10 @@ package collaboration
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/flosch/pongo2/v6"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/qascade/dcr/lib/collaboration/address"
@@ -137,56 +139,80 @@ func (c *Collaboration) DeRefTransformation(ref address.AddressRef) (*address.Dc
 	return nil, fmt.Errorf("transformation address not found. %s", ref)
 }
 
-func (c *Collaboration) CompileTransformation(sAddRef1 address.AddressRef, sAddRef2 address.AddressRef, tAddress address.AddressRef) error {
-	sAdd1I, ok := c.cachedSources[sAddRef1]
+// Compile Transformation will prepare a go_app package that will return the path for the same, Also the path of the output folder on where to put the results.
+func (c *Collaboration) CompileTransformationAndDestination(runnerstring, destinationOwner string, tRef address.AddressRef) (string, string, error) {
+	tDcrAdd, ok := c.cachedTransformations[tRef]
 	if !ok {
-		return fmt.Errorf("source address not found. %s", sAddRef1)
-	}
-	sAdd2I, ok := c.cachedSources[sAddRef2]
-	if !ok {
-		return fmt.Errorf("source address not found. %s", sAddRef2)
+		return "", "", fmt.Errorf("address with given address ref not found. %s", tRef)
 	}
 
-	sAdd1, ok := sAdd1I.(*address.SourceAddress)
+	if tDcrAdd.Type() != address.ADDRESS_TYPE_TRANSFORMATION {
+		return "", "", fmt.Errorf("invalid address type. %s. Should be of type transformation", tDcrAdd)
+	}
+
+	tAdd, ok := tDcrAdd.(*address.TransformationAddress)
 	if !ok {
-		return fmt.Errorf("could not cast address to source address type: %v", sAddRef1)
+		return "", "", fmt.Errorf("could not cast address to transformation address type: %v", tDcrAdd)
 	}
-	sAdd2, ok := sAdd2I.(*address.SourceAddress)
-	if !ok {
-		return fmt.Errorf("could not cast address to source address type: %v", sAddRef2)
-	}
-
-	noiseParams, err := matchNoiseParameters(sAdd1, sAdd2, &tAddress)
-	if err != nil {
-		return err
-	}
-
-	tAddI, ok := c.cachedTransformations[tAddress]
-	if !ok {
-		return fmt.Errorf("transformation address not found. %s", tAddress)
-	}
-	tAdd, ok := tAddI.(*address.TransformationAddress)
-	if !ok {
-		return fmt.Errorf("could not cast address to transformation address type: %v", tAddress)
-	}
-	pongoInputs := tAdd.Transformation.GetPongoInputs()
-	//_ := tAdd.Transformation.AppLocation()
-	for k, v := range noiseParams {
-		vS := fmt.Sprintf("%v", v)
-		pongoInputs[k] = vS
-	}
-
-	return nil
-}
-
-func matchNoiseParameters(sAdd1 *address.SourceAddress, sAdd2 *address.SourceAddress, tAdd *address.AddressRef) (map[string]interface{}, error) {
-	m1 := sAdd1.NoiseParams[*tAdd]
-	m2 := sAdd2.NoiseParams[*tAdd]
-
-	for k, v := range m1 {
-		if v != m2[k] {
-			return nil, fmt.Errorf("noise parameters do not match. %s", *tAdd)
+	// TODO - Add Authorizer code here.
+	t := tAdd.Transformation
+	appLocation := t.AppLocation()
+	sourceInfo := t.GetSourcesInfo()
+	pongoInputs := t.GetPongoInputs()
+	log.Info("Noise Validation yet to be implemented.")
+	// Fill rest of the pongo inputs
+	for _, source := range sourceInfo {
+		sAddI := c.cachedSources[address.AddressRef(source.AddressRef)]
+		sAdd := sAddI.(*address.SourceAddress)
+		// Fill CSVLocations
+		for k := range pongoInputs {
+			if pongoInputs[k] == "" {
+				noiseParams := sAdd.SourceNoises[tAdd.Ref]
+				if _, ok := noiseParams[k]; ok {
+					pongoInputs[k] = noiseParams[k]
+				}
+			}
+			if k == source.LocationPongoInput {
+				// TODO - fill absolute path only from yaml.
+				pongoInputs[k] = sAdd.Source.Extract()
+			}
 		}
 	}
-	return m1, nil
+	//pongoInputs["uniqueId"] =
+	path, err := prepareGoApp(appLocation, pongoInputs)
+	if err != nil {
+		return "", "", err
+	}
+
+	// TODO- HardCoding outputPath will have to populate later.
+	return path, "", nil
+}
+
+func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, error) {
+	// TODO - Add the code to prepare the go app.
+	//	tpl, err := pongo2.FromFile(appLocation)
+	ctx := pongo2.Context{}
+	for k, v := range pongoInputs {
+		ctx[k] = v
+	}
+	mainFilePath := filepath.Join(appLocation, "main.tpl")
+	tpl, err := pongo2.FromFile(mainFilePath)
+	if err != nil {
+		return "", err
+	}
+	output, err := tpl.Execute(ctx)
+	if err != nil {
+		return "", fmt.Errorf("error while executing the template: %v", err)
+	}
+	compiledMainPath := filepath.Join(appLocation, "main.go")
+	compiledMain, err := os.Create(compiledMainPath)
+	if err != nil {
+		return "", fmt.Errorf("error while creating the main.go file: %v", err)
+	}
+	log.Infof("Writing the compiled main.go file to %s", compiledMainPath)
+	_, err = compiledMain.WriteString(output)
+	if err != nil {
+		return "", fmt.Errorf("error while writing to the main.go file: %v", err)
+	}
+	return compiledMainPath, nil
 }

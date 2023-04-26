@@ -16,7 +16,6 @@ type TransformationSpec struct {
 	AppLocation        string     `yaml:"app_location"`
 	From               []FromSpec `yaml:"from"`
 	JoinKey            string     `yaml:"join_key"`
-	NoiseType          string     `yaml:"noise_type,omitempty"`
 	NoiseParams        []string   `yaml:"noise_parameters,omitempty"`
 	Template           string     `yaml:"template,omitempty"`
 	ConsumerAllowed    []string   `yaml:"consumer_allowed"`
@@ -58,8 +57,8 @@ type DestinationSpec struct {
 }
 
 type SourceDestinationAllowedSpec struct {
-	Ref         string `yaml:"ref"`
-	NoiseParams []any  `yaml:"noise_parameters"`
+	Ref         string              `yaml:"ref"`
+	NoiseParams []map[string]string `yaml:"noise_parameters"`
 }
 
 type FromSpec struct {
