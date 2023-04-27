@@ -5,20 +5,19 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 )
 
-func PrepareToSend() {
-	folderPath := "./go_app_templates/go_app"
-	err := SendRequestToServer(folderPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+// func PrepareToSend() {
+// 	folderPath := "./go_app_templates/go_app"
+// 	err := SendRequestToServer(folderPath)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
 
 func SendRequestToServer(folderPath string) error {
 	// Create a buffer to store the ZIP file contents

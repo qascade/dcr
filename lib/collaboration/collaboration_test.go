@@ -17,15 +17,18 @@ func TestCollaboration(t *testing.T) {
 	collabConfig := testConfig(t)
 	collaboration := testAddressGraph(t, collabConfig)
 	testAuthorization(t, collaboration)
-	testCompile(t, collaboration)
+	appPath := testCompile(t, collaboration)
+	err := service.SendRequestToServer(appPath)
+	require.NoError(t, err)
 }
 
-func testCompile(t *testing.T, collab *Collaboration) {
+func testCompile(t *testing.T, collab *Collaboration) string {
 	fmt.Println("Running TestCompile")
 	var testRef address.AddressRef = "/Research/transformation/private_total_customers"
-	path, outputPath, err := collab.CompileTransformationAndDestination("Media", "Research", testRef)
+	appPath, outputPath, err := collab.CompileTransformationAndDestination("Media", "Research", testRef)
 	require.NoError(t, err)
-	fmt.Println(path, outputPath)
+	fmt.Println(appPath, outputPath)
+	return appPath
 }
 
 func testAuthorization(t *testing.T, collaboration *Collaboration) {
