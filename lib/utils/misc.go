@@ -27,7 +27,7 @@ func RunCmd(cmd *exec.Cmd) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("unable to capture output for command:%s", err)
 	}
-	log.Infof("Output of cmd %s: %s", cmd.String(), output)
+	//log.Infof("Output of cmd %s: %s", cmd.String(), output)
 	return string(output), err
 }
 

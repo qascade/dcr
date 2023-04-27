@@ -178,7 +178,7 @@ func (ce *CollaborationEvent) SendDestination(appPath string, outputPath string)
 	if err != nil {
 		return err
 	}
-	fmt.Println(output)
+	//fmt.Println(output)
 
 	outputPath = outputPath + "/results.txt"
 	utils.WriteStringToFile(outputPath, output)

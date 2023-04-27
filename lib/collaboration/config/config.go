@@ -40,7 +40,7 @@ type CollaborationConfig struct {
 type PackageConfig struct {
 	CollaboratorName        string
 	PkgPath                 string
-	OutputFolderPath         string
+	OutputFolderPath        string
 	SourceSpec              *SourceGroupSpec
 	TransformationGroupSpec *TransformationGroupSpec
 	DestinationGroupSpec    *DestinationGroupSpec
@@ -94,12 +94,12 @@ func (c *ConfigFolder) newPackageConfig(pkgPath string) (*PackageConfig, error) 
 	if err != nil {
 		return nil, fmt.Errorf("error while parsing the source spec: %v, with pkgPath %s", err, pkgPath)
 	}
-	
+
 	tSpec, err := c.parseTransformationSpec(pkgPath)
 	if err != nil {
 		return nil, fmt.Errorf("error while parsing the transformation spec: %v, with pkgPath %s", err, pkgPath)
 	}
-	
+
 	dSpec, err := c.parseDestinationSpec(pkgPath)
 	if err != nil {
 		return nil, fmt.Errorf("error while parsing the destination spec: %v, with pkgPath %s", err, pkgPath)

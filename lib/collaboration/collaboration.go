@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/qascade/dcr/lib/collaboration/address"
+	"github.com/qascade/dcr/lib/collaboration/address/transformation"
 	"github.com/qascade/dcr/lib/collaboration/config"
 	"github.com/qascade/dcr/lib/utils"
 )
@@ -101,7 +102,6 @@ func (c *Collaboration) Authorizer(collaboratorRef address.AddressRef, root addr
 		return sAddress.Authorize(collaboratorRef, parentTransformationRef)
 	}
 	for _, neighbour := range c.AddressGraph.AdjacencyList[root] {
-		fmt.Println(c.AddressGraph.AdjacencyList[root])
 		if visited[neighbour] {
 			continue
 		}
@@ -168,7 +168,13 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 	appLocation := t.AppLocation()
 	sourceInfo := t.GetSourcesInfo()
 	pongoInputs := t.GetPongoInputs()
-	log.Info("Noise Validation yet to be implemented.")
+	log.Info("Validating Noises as per trust Group Policy")
+	err := validateNoises(sourceInfo)
+	if err != nil {
+		err = fmt.Errorf("err source noises not compliant to trust group policy, %s", err)
+		log.Error(err)
+		return "", err
+	}
 	// Fill rest of the pongo inputs
 	for _, source := range sourceInfo {
 		sAddI := c.cachedSources[address.AddressRef(source.AddressRef)]
@@ -188,12 +194,26 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 		}
 	}
 	//pongoInputs["uniqueId"] =
-	_, err := prepareGoApp(appLocation, pongoInputs)
+	_, err = prepareGoApp(appLocation, pongoInputs)
 	if err != nil {
 		return "", err
 	}
 	// TODO- HardCoding outputPath will have to populate later.
 	return appLocation, nil
+}
+
+func validateNoises(sourceInfo []transformation.SourceMetadata) error {
+	// This validateNoises will also need all the list of collaborators who gives permission to same transformation.
+	// This list will be fetched from address graph. All these collaborators will form a Trust Group
+	// After this we will have three options for noise Validation/Propagation
+	// 1. Only one collaborator from the trust Group is allowed to define noises.
+	// 		a. This validation can be simplified in yaml where other callaborators can acknowledge that by refering the noise parameters which can introduced as a address_type.
+	// 2. All collaborators that form a trust group have to give same noises at source level. If the noises mismatch, it will result in an error.
+	// 3. There is no such thing as a trust group everybody is free to define whatever amount of noise they want. We will have to define a mechanism such that from all the lists of noises.
+	//    that contributes the largest noise in the result will end up getting selected.
+	log.Info("Noise Validation yet to be implemented")
+	return nil
+
 }
 
 func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, error) {
