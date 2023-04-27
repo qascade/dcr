@@ -59,8 +59,8 @@ func init() {
 
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().StringP("runner", "r", "", "name of the transformation runner")
-	runCmd.Flags().StringP("transformation", "tref", "", "reference of the transformation")
-	runCmd.Flags().StringP("destinationOwner", "d", "", "name of the destination owner")
-	runCmd.Flags().StringP("destination", "dref", "", "reference of the destination")
+	runCmd.Flags().StringP("transformation", "t", "", "reference of the transformation")
+	runCmd.Flags().StringP("destinationOwner", "o", "", "name of the destination owner")
+	runCmd.Flags().StringP("destination", "d", "", "reference of the destination")
 	runCmd.Flags().StringP("pkgpath", "p", "", "reference of the destination")
 }
