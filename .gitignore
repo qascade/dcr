@@ -10,6 +10,7 @@
 dcr
 bin/
 samples/*/*/go_app/*.go
+samples/*/*/go_app/main
 results.txt
 
 # Test binary, built with `go test -c`

@@ -14,6 +14,7 @@ func TestService(t *testing.T) {
 	destRef := "/Research/destination/customer_overlap_count"
 
 	_, err := NewService(testPkgPath, runner, destinationOwner, tRef, destRef)
+	//service, err := NewService(testPkgPath, runner, destinationOwner, tRef, destRef)
 	require.NoError(t, err)
 
 	// err = service.RunCollaborationEvent()

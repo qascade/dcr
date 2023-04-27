@@ -181,6 +181,13 @@ func (ce *CollaborationEvent) SendDestination(appPath string, outputPath string)
 	//fmt.Println(output)
 
 	outputPath = outputPath + "/results.txt"
+	output = filterResults(output)
 	utils.WriteStringToFile(outputPath, output)
 	return nil
+}
+
+func filterResults(output string) string {
+	s := strings.Split(output, " ")
+	n := len(s)
+	return fmt.Sprintf("NonPrivateCount:%s PrivateCount:%s", strings.TrimLeft(s[n-2], "...\n"), strings.Trim(s[n-1], "\n"))
 }
