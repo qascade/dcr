@@ -1,14 +1,14 @@
 package utils
 
 import (
-	"fmt"
 	"bytes"
-	"os/exec"
-	"os"
+	"fmt"
 	"io"
+	"os"
+	"os/exec"
 
-	"gopkg.in/yaml.v3"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
 func init() {
@@ -22,7 +22,7 @@ func UnmarshalStrict(in []byte, out interface{}) (err error) {
 	return knownFieldsDecoder.Decode(out)
 }
 
-func RunCmd(cmd *exec.Cmd) (string,error) {
+func RunCmd(cmd *exec.Cmd) (string, error) {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("unable to capture output for command:%s", err)
@@ -72,16 +72,18 @@ func Remove(filePath string) error {
 
 func FileExists(filePath string) bool {
 	info, err := os.Stat(filePath)
-    if os.IsNotExist(err) {
-       return false
-    }
-    return !info.IsDir()	
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }
 
 func WriteStringToFile(filePath string, content string) error {
+	os.Getwd()
 	newFile, err := os.Create(filePath)
+
 	if err != nil {
-		err = fmt.Errorf("unable to create file %s", filePath)
+		err = fmt.Errorf("unable to create file %s, err:%s ", filePath, err)
 		log.Error(err)
 		return err
 	}

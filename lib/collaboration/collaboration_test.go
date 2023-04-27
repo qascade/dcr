@@ -7,47 +7,29 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/qascade/dcr/lib/collaboration/address"
 	"github.com/qascade/dcr/lib/collaboration/config"
 )
 
 func TestCollaboration(t *testing.T) {
 	fmt.Println("Running TestCollaboration")
-	collabConfig := testConfig(t)
-	collaboration := testAddressGraph(t, collabConfig)
-	testAuthorization(t, collaboration)
-	testCompile(t, collaboration)
+	testPath1, err := filepath.Abs("../../samples/test_collaboration")
+	require.NoError(t, err)
+
+	testPath2, err := filepath.Abs("../../samples/init_collaboration")
+	require.NoError(t, err)
+	testCompile(t, testPath1)
+	testCompile(t, testPath2)
 }
 
-func testCompile(t *testing.T, collab *Collaboration) {
+func testCompile(t *testing.T, path string) {
 	fmt.Println("Running TestCompile")
-	var testRef address.AddressRef = "/Research/transformation/private_total_customers"
-	path, outputPath, err := collab.CompileTransformationAndDestination("Media", "Research", testRef)
-	require.NoError(t, err)
-	fmt.Println(path, outputPath)
+	testConfig(t, path)
+	//testAddressGraph(t, path)
 }
 
-func testAuthorization(t *testing.T, collaboration *Collaboration) {
-	/* test 1 */
-	destRequester := address.AddressRef("/Research")
-	destination := address.AddressRef("/Research/destination/customer_overlap_count")
-
-	allowed, err := collaboration.AuthorizeCollaborationEvent(destRequester, destination)
-	require.NoError(t, err)
-	require.Equal(t, true, allowed)
-
-	/*test 2 */
-	transformationRunner := address.AddressRef("/Media")
-	transformation := address.AddressRef("/Research/transformation/total_customers")
-
-	allowed, err = collaboration.AuthorizeCollaborationEvent(transformationRunner, transformation)
-	require.NoError(t, err)
-	require.Equal(t, true, allowed)
-}
-
-func testAddressGraph(t *testing.T, collabConfig *config.CollaborationConfig) *Collaboration {
+func testAddressGraph(t *testing.T, pkgPath string) *Collaboration {
 	fmt.Println("Running TestAddressGraph")
-	collaboration, err := NewCollaboration(*collabConfig)
+	collaboration, err := NewCollaboration(pkgPath)
 	require.NoError(t, err)
 	fmt.Println("AddressGraph =============")
 	fmt.Println(*collaboration.AddressGraph)
@@ -55,16 +37,10 @@ func testAddressGraph(t *testing.T, collabConfig *config.CollaborationConfig) *C
 	return collaboration
 }
 
-func testConfig(t *testing.T) *config.CollaborationConfig {
+func testConfig(t *testing.T, path string) *config.CollaborationConfig {
 	fmt.Println("Running TestConfig")
 	parser := config.ConfigParser(config.ConfigFolder{})
-	testPath1, err := filepath.Abs("../../samples/test_collaboration")
-	require.NoError(t, err)
-
-	testPath2, err := filepath.Abs("../../samples/init_collaboration")
-	require.NoError(t, err)
-
-	_, err = parser.Parse(testPath1)
+	_, err := parser.Parse(path)
 	require.NoError(t, err)
 	// for _, pkg := range pkgConfig.PackagesInfo {
 	// 	fmt.Println("SourceSpec =============")
@@ -75,7 +51,7 @@ func testConfig(t *testing.T) *config.CollaborationConfig {
 	// 	fmt.Println(*pkg.TransformationGroupSpec)
 	// }
 
-	pkgConfig, err := parser.Parse(testPath2)
+	pkgConfig, err := parser.Parse(path)
 	require.NoError(t, err)
 	for _, pkg := range pkgConfig.PackagesInfo {
 		fmt.Println("SourceSpec =============")

@@ -40,7 +40,7 @@ type CollaborationConfig struct {
 type PackageConfig struct {
 	CollaboratorName        string
 	PkgPath                 string
-	OutpuFolderPath         string
+	OutputFolderPath         string
 	SourceSpec              *SourceGroupSpec
 	TransformationGroupSpec *TransformationGroupSpec
 	DestinationGroupSpec    *DestinationGroupSpec
@@ -48,9 +48,16 @@ type PackageConfig struct {
 
 func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
 	log.Infof("Parsing the config folder with path %s", path)
+	var err error
+	path, err = filepath.Abs(path)
+	if err != nil {
+		err = fmt.Errorf("err unable to get absolute path of %s, %s", path, err)
+		log.Error(err)
+		return nil, err
+	}
 	pkgsInfo := make(map[string]*PackageConfig)
 	var pkgPaths []string
-	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -82,24 +89,22 @@ func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
 }
 
 func (c *ConfigFolder) newPackageConfig(pkgPath string) (*PackageConfig, error) {
+	log.Infof("Creating new Package Config for pkgPath %s", pkgPath)
 	sSpec, err := c.parseSourceSpec(pkgPath)
 	if err != nil {
 		return nil, fmt.Errorf("error while parsing the source spec: %v, with pkgPath %s", err, pkgPath)
 	}
+	
 	tSpec, err := c.parseTransformationSpec(pkgPath)
 	if err != nil {
 		return nil, fmt.Errorf("error while parsing the transformation spec: %v, with pkgPath %s", err, pkgPath)
 	}
+	
 	dSpec, err := c.parseDestinationSpec(pkgPath)
 	if err != nil {
 		return nil, fmt.Errorf("error while parsing the destination spec: %v, with pkgPath %s", err, pkgPath)
 	}
 
-	log.Infof("Validating the CollaboratorRefs for all the specs, %s", sSpec.CollaboratorRef)
-	// _, err = ValidateAllCollaboratorRefsEqual(sSpec.CollaboratorRef, tSpec.CollaboratorRef, dSpec.CollaboratorRef)
-	// if err != nil {
-	// 	return nil, err
-	// }
 	cName, err := getCollaboratorNameFromConfig(sSpec, tSpec, dSpec)
 	if err != nil {
 		return nil, err
@@ -108,7 +113,7 @@ func (c *ConfigFolder) newPackageConfig(pkgPath string) (*PackageConfig, error) 
 	pkgConfig := &PackageConfig{
 		CollaboratorName:        cName,
 		PkgPath:                 pkgPath,
-		OutpuFolderPath:         filepath.Join(pkgPath, "output"),
+		OutputFolderPath:        filepath.Join(pkgPath, "output"),
 		SourceSpec:              sSpec,
 		TransformationGroupSpec: tSpec,
 		DestinationGroupSpec:    dSpec,

@@ -7,11 +7,11 @@ package service
 // Calls new Collaboration returns it.
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
-	_ "embed"
 
 	"github.com/qascade/dcr/lib/collaboration"
 	"github.com/qascade/dcr/lib/collaboration/address"
@@ -27,7 +27,7 @@ func init() {
 
 type Service struct {
 	collaboration *collaboration.Collaboration
-	collabEvent *CollaborationEvent
+	collabEvent   *CollaborationEvent
 }
 
 func NewService(pkgPath string, runner string, destOwner string, tRef string, destRef string) (*Service, error) {
@@ -37,7 +37,7 @@ func NewService(pkgPath string, runner string, destOwner string, tRef string, de
 		log.Error(err)
 		return nil, err
 	}
-	
+
 	runnerRef := address.NewCollaboratorRef(runner)
 	isRunnerAuthorized, err := collab.AuthorizeCollaborationEvent(runnerRef, address.AddressRef(tRef))
 	if err != nil {
@@ -63,16 +63,14 @@ func NewService(pkgPath string, runner string, destOwner string, tRef string, de
 		return nil, err
 	}
 
-	
 	collabEvent, err := NewCollaborationEvent(collab, runnerRef, address.AddressRef(tRef), destOwnerRef, address.AddressRef(destRef))
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
 	service := &Service{
-		collaboration: collab, 
-		collabEvent: collabEvent,
-
+		collaboration: collab,
+		collabEvent:   collabEvent,
 	}
 	return service, err
 }
@@ -82,13 +80,12 @@ func (s *Service) RunCollaborationEvent() error {
 }
 
 type CollaborationEvent struct {
-	Collaboration *collaboration.Collaboration
-	Runner address.AddressRef
+	Collaboration     *collaboration.Collaboration
+	Runner            address.AddressRef
 	TransformationRef address.AddressRef
-	DestinationOwner address.AddressRef
-	DestinationRef address.AddressRef
+	DestinationOwner  address.AddressRef
+	DestinationRef    address.AddressRef
 }
-
 
 func NewCollaborationEvent(collab *collaboration.Collaboration, runner address.AddressRef, tRef address.AddressRef, destOwner address.AddressRef, destRef address.AddressRef) (*CollaborationEvent, error) {
 	if !strings.Contains(string(tRef), "transformation") {
@@ -101,39 +98,40 @@ func NewCollaborationEvent(collab *collaboration.Collaboration, runner address.A
 		log.Error(err)
 		return nil, err
 	}
-	
-	collabEvent :=  &CollaborationEvent{
-		Collaboration: collab,
-		Runner: runner,
+
+	collabEvent := &CollaborationEvent{
+		Collaboration:     collab,
+		Runner:            runner,
 		TransformationRef: tRef,
-		DestinationOwner: destOwner, 
-		DestinationRef: destRef,
+		DestinationOwner:  destOwner,
+		DestinationRef:    destRef,
 	}
 	return collabEvent, nil
 }
 
 //go:embed temp_enclave.json
 var newEnclaveContent string
+
 func (ce *CollaborationEvent) Run() error {
 	goAppPath, err := ce.Collaboration.CompileTransformation(ce.TransformationRef)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	
+
 	outputPath, err := ce.Collaboration.GetOutputPath(ce.DestinationOwner)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
-	
+
 	err = ce.SendDestination(goAppPath, outputPath)
 	if err != nil {
 		err = fmt.Errorf("err sending Destination to %s for transformation: %s, %s", ce.DestinationOwner, ce.TransformationRef, err)
 		log.Error(err)
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -155,41 +153,34 @@ func (ce *CollaborationEvent) SendDestination(appPath string, outputPath string)
 	if err != nil {
 		return err
 	}
-	
+
 	// Put harcoded csv names to enclave.json
 	oldEnclave := "./enclave.json"
 	err = utils.Remove(oldEnclave)
 	if err != nil {
 		return err
 	}
-	
+
 	err = utils.WriteStringToFile("./enclave.json", newEnclaveContent)
 	if err != nil {
 		return err
 	}
-	
+
 	err = os.Setenv("OE_SIMULATION", "1")
 	if err != nil {
 		err = fmt.Errorf("unable to set env variable %s", "OE_SIMULATION")
 		log.Error(err)
 		return err
 	}
-	
+
 	mainRunCmd := exec.Command("ego", "run", "main")
 	output, err := utils.RunCmd(mainRunCmd)
 	if err != nil {
 		return err
 	}
 	fmt.Println(output)
-	err = os.Mkdir(outputPath, 0755)
-	if err != nil {
-		err = fmt.Errorf("unable to create directory:%s ", outputPath)
-		log.Error(err)
-		return err
-	}
-	
+
 	outputPath = outputPath + "/results.txt"
 	utils.WriteStringToFile(outputPath, output)
 	return nil
-}	
-
+}

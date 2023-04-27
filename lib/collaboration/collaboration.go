@@ -30,7 +30,7 @@ type Collaboration struct {
 
 func NewCollaboration(pkgPath string) (*Collaboration, error) {
 	var collaborators []string
-	
+
 	collabConfig, err := config.ConfigParser(config.NewConfigFolder()).Parse(pkgPath)
 	if err != nil {
 		err = fmt.Errorf("err parsing collaboration package with package path: %s", pkgPath)
@@ -230,14 +230,14 @@ func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, er
 
 	csvLocation1 := pongoInputs["csvLocation1"]
 	csvLocation2 := pongoInputs["csvLocation2"]
-	
+
 	// Copying the csv's to the go_app folder.
 	newCsV1Path := filepath.Join(appLocation, "test1.csv")
 	err = utils.CopyFile(newCsV1Path, csvLocation1)
 	if err != nil {
 		return "", err
 	}
-	
+
 	newCsV2Path := filepath.Join(appLocation, "test2.csv")
 	err = utils.CopyFile(newCsV2Path, csvLocation2)
 	if err != nil {
@@ -255,5 +255,5 @@ func (c *Collaboration) GetOutputPath(destOwner address.AddressRef) (string, err
 		log.Error(err)
 		return "", err
 	}
-	return pkgInfo.OutpuFolderPath, nil
+	return pkgInfo.PkgPath, nil
 }
