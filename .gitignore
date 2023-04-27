@@ -10,7 +10,10 @@
 dcr
 bin/
 samples/*/*/go_app/*.go
-results.txt
+samples/*/*/results.txt
+samples/*/*/go_app/enclave.json
+samples/*/*/go_app/private.pem
+samples/*/*/go_app/pubic.pem
 
 # Test binary, built with `go test -c`
 *.test
