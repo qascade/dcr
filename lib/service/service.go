@@ -1,11 +1,5 @@
 package service
 
-// behaviour for main
-
-// dcr run --requester Media --transformation t -p package_location -d destination
-
-// Calls new Collaboration returns it.
-
 import (
 	_ "embed"
 	"fmt"

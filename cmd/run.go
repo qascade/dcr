@@ -2,35 +2,65 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"github.com/qascade/dcr/lib/service"
+)
+
+var (
+	runner    string
+	dRef      string
+	tRef      string
+	destOwner string
+	pkgPath   string
 )
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Run Transformation and Destination",
+	Long:  `CLI Command to run mentioned transformation and destination`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// Fetch the flags.
+		runner = cmd.Flag("runner").Value.String()
+		tRef = cmd.Flag("transformation").Value.String()
+		dRef = cmd.Flag("destination").Value.String()
+		destOwner = cmd.Flag("destinationOwner").Value.String()
+		pkgPath = cmd.Flag("pkgpath").Value.String()
+		if runner == "" || tRef == "" || dRef == "" || destOwner == "" || pkgPath == "" {
+			err := fmt.Errorf("one or more flags are empty")
+			return err
+		}
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run called")
+		service, err := service.NewService(pkgPath, runner, destOwner, tRef, dRef)
+		if err != nil {
+			err = fmt.Errorf("err creating new service with package path: %s", pkgPath)
+			log.Error(err)
+			return err
+		}
+		err = service.RunCollaborationEvent()
+		if err != nil {
+			err = fmt.Errorf("err running collaboration event: %s", err)
+			log.Error(err)
+			return err
+		}
+		return nil
 	},
 }
 
+// dcr run --runner Media --transformation t -p package_location -d destinationOwner -dref destination_ref
+
 func init() {
+	log.SetLevel(log.DebugLevel)
+	log.SetOutput(os.Stdout)
+
 	rootCmd.AddCommand(runCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	runCmd.Flags().StringP("runner", "r", "", "name of the transformation runner")
+	runCmd.Flags().StringP("transformation", "t", "", "reference of the transformation")
+	runCmd.Flags().StringP("destinationOwner", "o", "", "name of the destination owner")
+	runCmd.Flags().StringP("destination", "d", "", "reference of the destination")
+	runCmd.Flags().StringP("pkgpath", "p", "", "reference of the destination")
 }
