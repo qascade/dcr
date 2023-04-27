@@ -33,6 +33,7 @@ sources:
         join_key: true
     consumers_allowed: # who is allowed to write transformations on my sources. 
       - Research
+      - Media  
     destinations_allowed: 
       - ref: /Research/transformation/private_total_customers 
         noise_parameters: 

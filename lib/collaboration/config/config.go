@@ -27,6 +27,10 @@ type ConfigParser interface {
 // ConfigFolder is the root folder for all the config files and implements ConfigParser.
 type ConfigFolder struct{}
 
+func NewConfigFolder() ConfigFolder {
+	return ConfigFolder{}
+}
+
 // All the Specs associated with a single Collaborator
 type CollaborationConfig struct {
 	CollaborationFolderPath string

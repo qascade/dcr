@@ -2,7 +2,6 @@ package collaboration
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/qascade/dcr/lib/collaboration/address"
 	"github.com/qascade/dcr/lib/collaboration/config"
+	"github.com/qascade/dcr/lib/utils"
 )
 
 func init() {
@@ -28,13 +28,21 @@ type Collaboration struct {
 	cachedDestination     map[address.AddressRef]address.DcrAddress
 }
 
-func NewCollaboration(collabConfig config.CollaborationConfig) (*Collaboration, error) {
+func NewCollaboration(pkgPath string) (*Collaboration, error) {
 	var collaborators []string
+	
+	collabConfig, err := config.ConfigParser(config.NewConfigFolder()).Parse(pkgPath)
+	if err != nil {
+		err = fmt.Errorf("err parsing collaboration package with package path: %s", pkgPath)
+		log.Error(err)
+		return nil, err
+	}
+
 	for _, pkgConfig := range collabConfig.PackagesInfo {
 		collaboratorName := pkgConfig.CollaboratorName
 		collaborators = append(collaborators, collaboratorName)
 	}
-	cSources, cTransformations, cDestinations := address.CacheAddresses(collabConfig)
+	cSources, cTransformations, cDestinations := address.CacheAddresses(*collabConfig)
 	graph, err := address.NewGraph(cSources, cTransformations, cDestinations)
 	if err != nil {
 		return nil, err
@@ -42,7 +50,7 @@ func NewCollaboration(collabConfig config.CollaborationConfig) (*Collaboration, 
 	collaboration := &Collaboration{
 		AddressGraph:          graph,
 		Collaborators:         collaborators,
-		collaborationConfig:   collabConfig,
+		collaborationConfig:   *collabConfig,
 		cachedSources:         cSources,
 		cachedTransformations: cTransformations,
 		cachedDestination:     cDestinations,
@@ -141,19 +149,19 @@ func (c *Collaboration) DeRefTransformation(ref address.AddressRef) (*address.Dc
 }
 
 // Compile Transformation will prepare a go_app package that will return the path for the same, Also the path of the output folder on where to put the results.
-func (c *Collaboration) CompileTransformationAndDestination(runnerstring, destinationOwner string, tRef address.AddressRef) (string, string, error) {
+func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, error) {
 	tDcrAdd, ok := c.cachedTransformations[tRef]
 	if !ok {
-		return "", "", fmt.Errorf("address with given address ref not found. %s", tRef)
+		return "", fmt.Errorf("address with given address ref not found. %s", tRef)
 	}
 
 	if tDcrAdd.Type() != address.ADDRESS_TYPE_TRANSFORMATION {
-		return "", "", fmt.Errorf("invalid address type. %s. Should be of type transformation", tDcrAdd)
+		return "", fmt.Errorf("invalid address type. %s. Should be of type transformation", tDcrAdd)
 	}
 
 	tAdd, ok := tDcrAdd.(*address.TransformationAddress)
 	if !ok {
-		return "", "", fmt.Errorf("could not cast address to transformation address type: %v", tDcrAdd)
+		return "", fmt.Errorf("could not cast address to transformation address type: %v", tDcrAdd)
 	}
 	// TODO - Add Authorizer code here.
 	t := tAdd.Transformation
@@ -180,13 +188,12 @@ func (c *Collaboration) CompileTransformationAndDestination(runnerstring, destin
 		}
 	}
 	//pongoInputs["uniqueId"] =
-	path, err := prepareGoApp(appLocation, pongoInputs)
+	_, err := prepareGoApp(appLocation, pongoInputs)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
-
 	// TODO- HardCoding outputPath will have to populate later.
-	return path, "", nil
+	return appLocation, nil
 }
 
 func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, error) {
@@ -223,44 +230,30 @@ func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, er
 
 	csvLocation1 := pongoInputs["csvLocation1"]
 	csvLocation2 := pongoInputs["csvLocation2"]
+	
 	// Copying the csv's to the go_app folder.
-	csvFile1, err := os.Open(csvLocation1)
-	if err != nil {
-		return "", fmt.Errorf("error while opening the csv file: %v", err)
-	}
-	defer csvFile1.Close()
-
-	csvFile2, err := os.Open(csvLocation2)
-	if err != nil {
-		return "", fmt.Errorf("error while opening the csv file: %v", err)
-	}
-	defer csvFile2.Close()
-
 	newCsV1Path := filepath.Join(appLocation, "test1.csv")
+	err = utils.CopyFile(newCsV1Path, csvLocation1)
+	if err != nil {
+		return "", err
+	}
+	
 	newCsV2Path := filepath.Join(appLocation, "test2.csv")
-	newCsV1, err := os.Create(newCsV1Path)
+	err = utils.CopyFile(newCsV2Path, csvLocation2)
 	if err != nil {
-		return "", fmt.Errorf("error while creating the csv file: %v", err)
-	}
-	defer newCsV1.Close()
-
-	newCsv2, err := os.Create(newCsV2Path)
-	if err != nil {
-		return "", fmt.Errorf("error while creating the csv file: %v", err)
-	}
-	defer newCsv2.Close()
-	log.Infof("Writing the csv files to %s and %s", newCsV1Path, newCsV2Path)
-	_, err = io.Copy(newCsV1, csvFile1)
-	if err != nil {
-		log.Fatal(err)
 		return "", err
 	}
-
-	_, err = io.Copy(newCsv2, csvFile2)
-	if err != nil {
-		log.Fatal(err)
-		return "", err
-	}
-
 	return compiledMainPath, nil
+}
+
+func (c *Collaboration) GetOutputPath(destOwner address.AddressRef) (string, error) {
+	owner := string(destOwner)
+	owner = owner[1:]
+	pkgInfo, ok := c.collaborationConfig.PackagesInfo[owner]
+	if !ok {
+		err := fmt.Errorf("collaborator with name: %s does not exist", owner)
+		log.Error(err)
+		return "", err
+	}
+	return pkgInfo.OutpuFolderPath, nil
 }
