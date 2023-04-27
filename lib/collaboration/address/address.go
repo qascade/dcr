@@ -90,7 +90,7 @@ func (sa *SourceAddress) Authorize(collabName AddressRef, tName AddressRef) (boo
 	collabAllowed := false
 	destAllowed := false
 	for _, allowedCollab := range sa.ConsumersAllowed {
-		if collabName == NewCollaboratorRef(string(allowedCollab)) {
+		if collabName == allowedCollab {
 			collabAllowed = true
 		}
 	}
@@ -191,7 +191,7 @@ func (da *DestinationAddress) Type() AddressType {
 func getAddressRefSlice(s []string) []AddressRef {
 	addRefS := make([]AddressRef, 0)
 	for _, str := range s {
-		addRefS = append(addRefS, AddressRef(str))
+		addRefS = append(addRefS, NewCollaboratorRef(str))
 	}
 	return addRefS
 }

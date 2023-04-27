@@ -21,6 +21,7 @@ type Transformation interface {
 }
 
 type SourceMetadata struct {
+	CollaboratorName   string
 	SourceName         string
 	LocationPongoInput string
 	AddressRef         string
@@ -37,7 +38,7 @@ type GoApp struct {
 func NewGoApp(cName string, tSpec config.TransformationSpec) Transformation {
 	pongoInputs := make(map[string]string)
 	pongoInputs["uniqueID"] = tSpec.UniqueId
-	sources := getSourcesFromSpec(tSpec)
+	sources := getSourcesFromSpec(cName, tSpec)
 	registerNoiseParams(tSpec, pongoInputs, sources)
 	return &GoApp{
 		CollaboratorName: cName,
@@ -58,10 +59,11 @@ func (ga *GoApp) GetPongoInputs() map[string]string {
 func (ga *GoApp) AppLocation() string {
 	return ga.appLocation
 }
-func getSourcesFromSpec(tSpec config.TransformationSpec) []SourceMetadata {
+func getSourcesFromSpec(cName string, tSpec config.TransformationSpec) []SourceMetadata {
 	var sources []SourceMetadata
 	for _, source := range tSpec.From {
 		metadata := SourceMetadata{
+			CollaboratorName:   cName,
 			SourceName:         source.Name,
 			LocationPongoInput: source.LocationTag,
 			AddressRef:         source.Ref,
