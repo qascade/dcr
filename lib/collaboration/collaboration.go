@@ -27,6 +27,7 @@ type Collaboration struct {
 	cachedSources         map[address.AddressRef]address.DcrAddress
 	cachedTransformations map[address.AddressRef]address.DcrAddress
 	cachedDestination     map[address.AddressRef]address.DcrAddress
+	TopoOrder             []address.AddressRef
 }
 
 func NewCollaboration(pkgPath string) (*Collaboration, error) {
@@ -45,6 +46,11 @@ func NewCollaboration(pkgPath string) (*Collaboration, error) {
 	}
 	cSources, cTransformations, cDestinations := address.CacheAddresses(*collabConfig)
 	graph, err := address.NewGraph(cSources, cTransformations, cDestinations)
+	if err != nil {
+		err = fmt.Errorf("err while topologically sorting the address graph: %s", err)
+		log.Error(err)
+		return nil, err
+	}
 	if err != nil {
 		return nil, err
 	}

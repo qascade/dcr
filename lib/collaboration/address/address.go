@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/edwingeng/deque"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/qascade/dcr/lib/collaboration/address/destination"
@@ -18,12 +19,15 @@ func init() {
 }
 
 type Graph struct {
+	Count         int
 	AdjacencyList map[AddressRef][]AddressRef
+	InorderList   map[AddressRef]int
+	TopoOrder     []AddressRef
 }
 
 func NewGraph(cSources map[AddressRef]DcrAddress, cTransformations map[AddressRef]DcrAddress, cDestinations map[AddressRef]DcrAddress) (*Graph, error) {
 	log.Info("Graph is being populated...")
-
+	count := len(cSources) + len(cTransformations) + len(cDestinations)
 	adjList := make(map[AddressRef][]AddressRef)
 	for tRef, tAddressI := range cTransformations {
 		tAddress, ok := tAddressI.(*TransformationAddress)
@@ -50,10 +54,69 @@ func NewGraph(cSources map[AddressRef]DcrAddress, cTransformations map[AddressRe
 		adjList[dRef] = append(adjList[dRef], AddressRef(dAddress.Destination.GetTransformationRef()))
 	}
 
+	inorderList := make(map[AddressRef]int)
+	// Create InorderList
+	for _, neighbourList := range adjList {
+		for _, neighbour := range neighbourList {
+			if _, ok := inorderList[neighbour]; !ok {
+				inorderList[neighbour] = 1
+			} else {
+				inorderList[neighbour]++
+			}
+		}
+	}
+
+	// Do topological sort
+	topoOrder, err := topoSort(count, adjList, inorderList)
+	if err != nil {
+		err = fmt.Errorf("not able to do topological sort, %v", err)
+		log.Error(err)
+		return nil, err
+	}
 	graph := &Graph{
+		Count:         count,
 		AdjacencyList: adjList,
+		InorderList:   inorderList,
+		TopoOrder:     topoOrder,
 	}
 	return graph, nil
+}
+
+func topoSort(count int, adjList map[AddressRef][]AddressRef, inorderList map[AddressRef]int) ([]AddressRef, error) {
+	// Create a queue and enqueue all vertices with indegree 0
+	var queue deque.Deque = deque.NewDeque()
+	for k, v := range inorderList {
+		if v == 0 {
+			queue.PushBack(k)
+		}
+	}
+	var topoOrder []AddressRef
+
+	for queue.Len() != 0 {
+		// Dequeue a vertex from queue and add it to topoOrder
+		v, ok := queue.PopFront().(AddressRef)
+		if !ok {
+			err := fmt.Errorf("could not convert to AddressRef, %v", v)
+			log.Error(err)
+			return nil, err
+		}
+		topoOrder = append(topoOrder, v)
+		// Iterate through all its neighbouring nodes of dequeued node u and decrease their in-degree by 1
+		for _, neighbour := range adjList[v] {
+			inorderList[neighbour]--
+			// If in-degree becomes zero, add it to queue
+			if inorderList[neighbour] == 0 {
+				queue.PushBack(neighbour)
+			}
+		}
+	}
+	// Check if there was a cycle
+	if len(topoOrder) != count {
+		err := fmt.Errorf("there exists a cycle in the graph")
+		log.Error(err)
+		return nil, err
+	}
+	return topoOrder, nil
 }
 
 // All AddressNodeTypes must implement this interface
