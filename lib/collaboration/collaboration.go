@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/flosch/pongo2/v6"
 	log "github.com/sirupsen/logrus"
@@ -27,13 +26,12 @@ type Collaboration struct {
 	cachedSources         map[address.AddressRef]address.DcrAddress
 	cachedTransformations map[address.AddressRef]address.DcrAddress
 	cachedDestination     map[address.AddressRef]address.DcrAddress
-	TopoOrder             []address.AddressRef
 }
 
 func NewCollaboration(pkgPath string) (*Collaboration, error) {
 	var collaborators []string
 
-	collabConfig, err := config.ConfigParser(config.NewConfigFolder()).Parse(pkgPath)
+	collabConfig, err := config.Parser(config.NewCollaborationConfig()).Parse(pkgPath)
 	if err != nil {
 		err = fmt.Errorf("err parsing collaboration package with package path: %s", pkgPath)
 		log.Error(err)
@@ -49,9 +47,6 @@ func NewCollaboration(pkgPath string) (*Collaboration, error) {
 	if err != nil {
 		err = fmt.Errorf("err while topologically sorting the address graph: %s", err)
 		log.Error(err)
-		return nil, err
-	}
-	if err != nil {
 		return nil, err
 	}
 	collaboration := &Collaboration{
@@ -72,10 +67,10 @@ func (c *Collaboration) AuthorizeCollaborationEvent(collaboratorRef address.Addr
 	// If collaborator wants to download a destination it should pass the destination address as root.
 	visited := make(map[address.AddressRef]bool)
 	var parentTransformationRef address.AddressRef
-	if strings.Contains(string(root), "transformation") {
+	if root.IsTransformation() {
 		parentTransformationRef = root
 	}
-	if strings.Contains(string(root), "destination") {
+	if root.IsDestination() {
 		// As movement from destination to Transformation is always allowed. We need to store its neighbouring transformation.
 		dAddress, ok := c.cachedDestination[root].(*address.DestinationAddress)
 		if !ok {
@@ -99,7 +94,7 @@ func (c *Collaboration) AuthorizeCollaborationEvent(collaboratorRef address.Addr
 func (c *Collaboration) Authorizer(collaboratorRef address.AddressRef, root address.AddressRef, visited map[address.AddressRef]bool, parentTransformationRef address.AddressRef) (bool, error) {
 	var err error
 	var movementPermission bool
-	if strings.Contains(string(root), "source") {
+	if root.IsSource() {
 		sAddress, ok := c.cachedSources[root]
 		if !ok {
 			return false, fmt.Errorf("address with given address ref not found. %s", root)
@@ -112,7 +107,7 @@ func (c *Collaboration) Authorizer(collaboratorRef address.AddressRef, root addr
 			continue
 		}
 		visited[neighbour] = true
-		if strings.Contains(string(root), "transformation") {
+		if root.IsTransformation() {
 			neighbourAddress, ok := c.cachedTransformations[root]
 			if !ok {
 				return false, fmt.Errorf("address with given address ref not found. %s", root)
@@ -123,7 +118,7 @@ func (c *Collaboration) Authorizer(collaboratorRef address.AddressRef, root addr
 				log.Error(err)
 				return false, err
 			}
-		} else if strings.Contains(string(root), "destination") {
+		} else if root.IsDestination() {
 			neighbourAddress, ok := c.cachedDestination[root]
 			if !ok {
 				return false, fmt.Errorf("address with given address ref not found. %s", root)
@@ -208,6 +203,8 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 	return appLocation, nil
 }
 
+// This function validate noises for the members in the trust group.
+// A trust group is a set of collaborators who have given permission to the same transformation.
 func validateNoises(sourceInfo []transformation.SourceMetadata) error {
 	// This validateNoises will also need all the list of collaborators who gives permission to same transformation.
 	// This list will be fetched from address graph. All these collaborators will form a Trust Group

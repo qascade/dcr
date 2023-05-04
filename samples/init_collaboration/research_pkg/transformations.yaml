@@ -15,5 +15,5 @@ transformations:
       - noiseType
       - epsilon 
       - maxPartitionsPerUser
-    consumer_allowed: 
+    consumer_allowed: # who is allowed to send its sources for this transformation
       - Media

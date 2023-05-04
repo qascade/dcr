@@ -1,4 +1,0 @@
-collaborator: collab3
-destinations: 
-  - name: customer_overlap_count
-    ref: /collab3/transformation/transformation3

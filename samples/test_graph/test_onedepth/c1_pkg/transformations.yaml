@@ -1,0 +1,14 @@
+collaborator: c1
+transformations: 
+  - name: t1 # research/tranformation/private_total_count/output
+    type: go_code
+    from: 
+      - name: c3_s1_alias
+        ref: /c3/source/s1 
+      - name: c3_d1_alias
+        ref: /c3/destination/d1
+    noise_parameters: 
+      - epsilon 
+      - delta
+    consumer_allowed: 
+      - c2

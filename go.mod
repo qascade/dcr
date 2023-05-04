@@ -3,6 +3,7 @@ module github.com/qascade/dcr
 go 1.19
 
 require (
+	github.com/edwingeng/deque v1.0.3
 	github.com/flosch/pongo2/v6 v6.0.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
@@ -12,7 +13,6 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/edwingeng/deque v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

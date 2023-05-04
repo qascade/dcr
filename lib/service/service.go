@@ -82,12 +82,12 @@ type CollaborationEvent struct {
 }
 
 func NewCollaborationEvent(collab *collaboration.Collaboration, runner address.AddressRef, tRef address.AddressRef, destOwner address.AddressRef, destRef address.AddressRef) (*CollaborationEvent, error) {
-	if !strings.Contains(string(tRef), "transformation") {
+	if !tRef.IsTransformation() {
 		err := fmt.Errorf("ref of Invalid type %s. Should be of type /transformation", tRef)
 		log.Error(err)
 		return nil, err
 	}
-	if !strings.Contains(string(destRef), "destination") {
+	if !destRef.IsDestination() {
 		err := fmt.Errorf("ref of Invalid type %s. Should be of type /destination", destRef)
 		log.Error(err)
 		return nil, err

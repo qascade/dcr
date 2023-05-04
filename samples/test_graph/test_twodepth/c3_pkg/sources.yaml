@@ -1,0 +1,15 @@
+collaborator: c3 #name of collaborator 
+sources: 
+  - name: s1
+    csv_location: c3_s1_loc
+    description: table having data for c3_s1 
+    columns:
+      - name: col1 
+        type: string
+    consumers_allowed: # who is allowed to use this source in transformation
+      - c2
+    destinations_allowed: 
+      - ref: /c3/destination/d1
+        noise_parameters: 
+          - epsilon: ln3 
+          - delta: 1e-5

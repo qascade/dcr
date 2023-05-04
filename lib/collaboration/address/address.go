@@ -21,7 +21,7 @@ func init() {
 type Graph struct {
 	Count         int
 	AdjacencyList map[AddressRef][]AddressRef
-	InorderList   map[AddressRef]int
+	IndegreeList  map[AddressRef]int
 	TopoOrder     []AddressRef
 }
 
@@ -35,14 +35,22 @@ func NewGraph(cSources map[AddressRef]DcrAddress, cTransformations map[AddressRe
 			log.Error("The address is not of type TransformationAddress")
 			return nil, fmt.Errorf("the address is not of type TransformationAddress for addressRef: %s", tRef)
 		}
+
 		sourcesInfo := tAddress.Transformation.GetSourcesInfo()
 		for _, sourceMetadata := range sourcesInfo {
 			sAddress := cSources[AddressRef(sourceMetadata.AddressRef)]
-			if sAddress == nil {
+			if sAddress != nil {
+				adjList[tRef] = append(adjList[tRef], AddressRef(sourceMetadata.AddressRef))
+				continue
+			}
+			// A transformation may consume destination as a potential source.
+			if AddressRef(sourceMetadata.AddressRef).IsDestination() {
+				fmt.Printf("Info::transformation %s has a destination %s as a source\n", tRef, sourceMetadata.AddressRef)
+				adjList[tRef] = append(adjList[tRef], AddressRef(sourceMetadata.AddressRef))
+			} else {
 				log.Error("Source Address not found")
 				return nil, fmt.Errorf("source Address not found for addressRef: %s", sourceMetadata.AddressRef)
 			}
-			adjList[tRef] = append(adjList[tRef], AddressRef(sourceMetadata.AddressRef))
 		}
 	}
 	for dRef, dAddressI := range cDestinations {
@@ -54,20 +62,22 @@ func NewGraph(cSources map[AddressRef]DcrAddress, cTransformations map[AddressRe
 		adjList[dRef] = append(adjList[dRef], AddressRef(dAddress.Destination.GetTransformationRef()))
 	}
 
-	inorderList := make(map[AddressRef]int)
-	// Create InorderList
-	for _, neighbourList := range adjList {
+	indegreeList := make(map[AddressRef]int)
+	// Create indegreeList
+	for v, neighbourList := range adjList {
+		if _, ok := indegreeList[v]; !ok {
+			indegreeList[v] = 0
+		}
 		for _, neighbour := range neighbourList {
-			if _, ok := inorderList[neighbour]; !ok {
-				inorderList[neighbour] = 1
-			} else {
-				inorderList[neighbour]++
+			if _, ok := indegreeList[neighbour]; !ok {
+				indegreeList[neighbour] = 0
 			}
+			indegreeList[neighbour]++
 		}
 	}
 
 	// Do topological sort
-	topoOrder, err := topoSort(count, adjList, inorderList)
+	topoOrder, err := topoSort(count, adjList, indegreeList)
 	if err != nil {
 		err = fmt.Errorf("not able to do topological sort, %v", err)
 		log.Error(err)
@@ -76,16 +86,16 @@ func NewGraph(cSources map[AddressRef]DcrAddress, cTransformations map[AddressRe
 	graph := &Graph{
 		Count:         count,
 		AdjacencyList: adjList,
-		InorderList:   inorderList,
+		IndegreeList:  indegreeList,
 		TopoOrder:     topoOrder,
 	}
 	return graph, nil
 }
 
-func topoSort(count int, adjList map[AddressRef][]AddressRef, inorderList map[AddressRef]int) ([]AddressRef, error) {
+func topoSort(count int, adjList map[AddressRef][]AddressRef, indegreeList map[AddressRef]int) ([]AddressRef, error) {
 	// Create a queue and enqueue all vertices with indegree 0
 	var queue deque.Deque = deque.NewDeque()
-	for k, v := range inorderList {
+	for k, v := range indegreeList {
 		if v == 0 {
 			queue.PushBack(k)
 		}
@@ -103,9 +113,9 @@ func topoSort(count int, adjList map[AddressRef][]AddressRef, inorderList map[Ad
 		topoOrder = append(topoOrder, v)
 		// Iterate through all its neighbouring nodes of dequeued node u and decrease their in-degree by 1
 		for _, neighbour := range adjList[v] {
-			inorderList[neighbour]--
+			indegreeList[neighbour]--
 			// If in-degree becomes zero, add it to queue
-			if inorderList[neighbour] == 0 {
+			if indegreeList[neighbour] == 0 {
 				queue.PushBack(neighbour)
 			}
 		}
