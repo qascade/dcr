@@ -2,23 +2,21 @@ package collaboration
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
 	"github.com/qascade/dcr/lib/collaboration/config"
 )
 
-func init() {
-	log.SetLevel(log.ErrorLevel)
-	log.SetOutput(os.Stdout)
-}
-
 func TestGraph(t *testing.T) {
 	fmt.Println("Running TestCollaboration")
+	testInitCollaborationPath, err := filepath.Abs("../../samples/init_collaboration")
+	require.NoError(t, err)
+
+	testAddressGraph(t, testInitCollaborationPath)
+
 	testOneDepthPath, err := filepath.Abs("../../samples/test_graph/test_onedepth")
 	require.NoError(t, err)
 
@@ -33,12 +31,10 @@ func TestGraph(t *testing.T) {
 func TestParse(t *testing.T) {
 	testOneDepthPath, err := filepath.Abs("../../samples/init_collaboration")
 	require.NoError(t, err)
-	log.Printf("Running TestParse for pkgPath = %s\n", testOneDepthPath)
 	testConfig(t, testOneDepthPath)
 
 	testTwoDepthPath, err := filepath.Abs("../../samples/test_graph/test_twodepth")
 	require.NoError(t, err)
-	log.Printf("Running TestParse for pkgPath = %s\n", testTwoDepthPath)
 	testConfig(t, testTwoDepthPath)
 }
 
@@ -61,7 +57,6 @@ func testAddressGraph(t *testing.T, pkgPath string) *Collaboration {
 }
 
 func testConfig(t *testing.T, path string) *config.CollaborationConfig {
-	log.Printf("Running TestConfig, path = %s\n", path)
 	parser := config.Parser(config.NewCollaborationConfig())
 	pkgConfig, err := parser.Parse(path)
 	require.NoError(t, err)

@@ -211,26 +211,17 @@ func NewTransformationAddress(ref AddressRef, owner string, consumersAllowed []A
 func (ta *TransformationAddress) Authorize(collabName AddressRef, _ AddressRef) (bool, error) {
 	log.Infof("Collaborator %s is trying to consume transformation %s, Performing authorization", collabName, ta.Ref)
 	collabAllowed := false
-	destAllowed := false
 
 	for _, allowedCollab := range ta.ConsumersAllowed {
 		if collabName == allowedCollab {
 			collabAllowed = true
 		}
 	}
-	for _, allowedDest := range ta.DestinationsAllowed {
-		if collabName == allowedDest {
-			destAllowed = true
-		}
-	}
-
-	if collabAllowed && destAllowed {
+	if collabAllowed {
 		log.Infof("Collaborator %s is allowed to consume transformation %s. Authorization Successful", collabName, ta.Ref)
 		return true, nil
 	}
-	err := fmt.Errorf("collaborator %s is not allowed to consume transformation %s", collabName, ta.Ref)
-	log.Error(err)
-	return false, err
+	return false, fmt.Errorf("collaborator %s is not allowed to consume transformation %s", collabName, ta.Ref)
 }
 
 func (ta *TransformationAddress) Type() AddressType {
@@ -239,14 +230,14 @@ func (ta *TransformationAddress) Type() AddressType {
 
 type DestinationAddress struct {
 	Ref         AddressRef
-	Requester   AddressRef
+	Owner       AddressRef
 	Destination destination.Destination
 }
 
-func NewDestinationAddress(ref AddressRef, requester AddressRef, dest destination.Destination) DcrAddress {
+func NewDestinationAddress(ref AddressRef, owner AddressRef, dest destination.Destination) DcrAddress {
 	return &DestinationAddress{
 		Ref:         ref,
-		Requester:   AddressRef(requester),
+		Owner:       AddressRef(owner),
 		Destination: dest,
 	}
 }
