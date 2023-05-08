@@ -106,40 +106,6 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 	return appLocation, nil
 }
 
-// This function returns the list ordered runnable events with the event increasing graph depth.
-// These events are yet to be authorized and are to be done by Authorizer when triggered by Service.
-// Runnable events are already authorized. All the unauthorized addresses and their corresponding dependent addresses should not show up in the topo Order.
-func (c *Collaboration) GetOrderedRunnableEvents() ([]Event, error) {
-	runnableRefs, err := c.AddressGraph.GetOrderedRunnableRefs()
-	if err != nil {
-		err := fmt.Errorf("err while getting ordered runnable refs: %s", err)
-		log.Error(err)
-		return nil, err
-	}
-
-	events := make([]Event, len(runnableRefs))
-	for i, ref := range runnableRefs {
-		if ref.IsDestination() {
-			event, err := NewSendDestinationEvent(c, ref)
-			if err != nil {
-				err = fmt.Errorf("err creating new destination event: %s", err)
-				log.Error(err)
-				return nil, err
-			}
-			events[i] = event
-		} else {
-			event, err := NewRunTransformationEvent(c, ref)
-			if err != nil {
-				err = fmt.Errorf("err creating new transformation event: %s", err)
-				log.Error(err)
-				return nil, err
-			}
-			events[i] = event
-		}
-	}
-	return events, nil
-}
-
 // This function validate noises for the members in the trust group.
 // A trust group is a set of sources who have given permission to the same transformation.
 func validateNoises(sourceInfo []transformation.SourceMetadata) error {

@@ -3,7 +3,6 @@ package collaboration
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -47,11 +46,4 @@ func (c *Collaboration) GetOutputPath(destOwner address.AddressRef) (string, err
 		return "", err
 	}
 	return pkgInfo.PkgPath, nil
-}
-
-// This is a helper function for the unique email specific example. To be removed later.
-func filterResults(output string) string {
-	s := strings.Split(output, " ")
-	n := len(s)
-	return fmt.Sprintf("NonPrivateCount:%s PrivateCount:%s", strings.TrimLeft(s[n-2], "...\n"), strings.Trim(s[n-1], "\n"))
 }
