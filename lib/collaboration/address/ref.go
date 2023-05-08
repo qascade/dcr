@@ -30,6 +30,16 @@ func (a AddressRef) IsDestination() bool {
 	return strings.Contains(string(a), string(ADDRESS_TYPE_DESTINATION))
 }
 
+func (a AddressRef) Collaborator() AddressRef {
+	s := strings.Split(string(a), "/")
+	return AddressRef("/" + s[1])
+}
+
+func (a AddressType) Name() string {
+	s := strings.Split(string(a), "/")
+	return s[2]
+}
+
 // This function will take in the name of the address and the name of the collaborator and return the absolute addressRef
 func Abs(addressName string, collaboratorName string, addType AddressType) AddressRef {
 	return AddressRef(ADDRESS_TYPE_ROOT) + AddressRef(collaboratorName) + AddressRef("/") + AddressRef(addType) + AddressRef(addressName)

@@ -35,7 +35,7 @@ sources:
     consumers_allowed: # who is allowed to use this source in transformation
       - Research
     destinations_allowed: 
-      - ref: /Research/transformation/private_total_customers 
+      - ref: /Research/destination/customer_overlap_count 
         noise_parameters: 
           - noiseType: Laplace
           - epsilon: math.Log(2) 

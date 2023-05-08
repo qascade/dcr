@@ -8,8 +8,13 @@ sources:
         type: string
     consumers_allowed: # who is allowed to use this source in transformation
       - c2
+      - c1
     destinations_allowed: 
       - ref: /c3/destination/d1
         noise_parameters: 
           - epsilon: ln3 
           - delta: 1e-5
+      - ref: /c2/destination/d1
+        noise_parameters: 
+          - epsilon: ln3 
+          - delta: 1e-5c

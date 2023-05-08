@@ -7,6 +7,8 @@ sources:
       - name: col1 
         type: string
         masking_type: sha256
+    consumers_allowed: 
+      - c1
     destinations_allowed: 
       - ref: /c3/destination/d1
         noise_parameters: 

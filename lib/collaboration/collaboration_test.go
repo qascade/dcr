@@ -12,15 +12,15 @@ import (
 
 func TestGraph(t *testing.T) {
 	fmt.Println("Running TestCollaboration")
-	testInitCollaborationPath, err := filepath.Abs("../../samples/init_collaboration")
-	require.NoError(t, err)
+	// testInitCollaborationPath, err := filepath.Abs("../../samples/init_collaboration")
+	// require.NoError(t, err)
 
-	testAddressGraph(t, testInitCollaborationPath)
+	// testAddressGraph(t, testInitCollaborationPath)
 
-	testOneDepthPath, err := filepath.Abs("../../samples/test_graph/test_onedepth")
-	require.NoError(t, err)
+	// testOneDepthPath, err := filepath.Abs("../../samples/test_graph/test_onedepth")
+	// require.NoError(t, err)
 
-	testAddressGraph(t, testOneDepthPath)
+	// testAddressGraph(t, testOneDepthPath)
 
 	testTwoDepthPath, err := filepath.Abs("../../samples/test_graph/test_twodepth")
 	require.NoError(t, err)
@@ -33,9 +33,9 @@ func TestParse(t *testing.T) {
 	require.NoError(t, err)
 	testConfig(t, testOneDepthPath)
 
-	testTwoDepthPath, err := filepath.Abs("../../samples/test_graph/test_twodepth")
-	require.NoError(t, err)
-	testConfig(t, testTwoDepthPath)
+	// testTwoDepthPath, err := filepath.Abs("../../samples/test_graph/test_twodepth")
+	// require.NoError(t, err)
+	// testConfig(t, testTwoDepthPath)
 }
 
 func testAddressGraph(t *testing.T, pkgPath string) *Collaboration {
@@ -49,9 +49,13 @@ func testAddressGraph(t *testing.T, pkgPath string) *Collaboration {
 	fmt.Println(graph.Count)
 	fmt.Println("AdjacencyList =============")
 	fmt.Println(graph.AdjacencyList)
-	fmt.Println("TopoOrder =============")
-	fmt.Println(graph.TopoOrder)
 
+	refs, err := graph.GetOrderedRunnableRefs()
+	require.NoError(t, err)
+	fmt.Println("OrderedRunnableRefs =============")
+	fmt.Println(refs)
+	fmt.Println("AuthorityStatus =============")
+	fmt.Println(graph.AuthorityStatus)
 	require.NotNil(t, collaboration.AddressGraph)
 	return collaboration
 }

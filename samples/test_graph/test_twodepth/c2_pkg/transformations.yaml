@@ -13,4 +13,6 @@ transformations:
       - epsilon 
       - delta
     consumer_allowed: 
+      - c1
+      - c2
       - c3

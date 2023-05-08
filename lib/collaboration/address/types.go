@@ -7,10 +7,6 @@ import (
 	"github.com/qascade/dcr/lib/collaboration/config"
 )
 
-const (
-	COLLABORATION_FOLDER_NAME = "collaboration"
-)
-
 type AddressType string
 
 const (

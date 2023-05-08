@@ -20,12 +20,9 @@ func init() {
 }
 
 type Collaboration struct {
-	AddressGraph          *address.Graph
-	Collaborators         []string
-	collaborationConfig   config.CollaborationConfig
-	cachedSources         map[address.AddressRef]address.DcrAddress
-	cachedTransformations map[address.AddressRef]address.DcrAddress
-	cachedDestinations    map[address.AddressRef]address.DcrAddress
+	AddressGraph        *address.Graph
+	Collaborators       []string
+	collaborationConfig config.CollaborationConfig
 }
 
 func NewCollaboration(pkgPath string) (*Collaboration, error) {
@@ -50,101 +47,16 @@ func NewCollaboration(pkgPath string) (*Collaboration, error) {
 		return nil, err
 	}
 	collaboration := &Collaboration{
-		AddressGraph:          graph,
-		Collaborators:         collaborators,
-		collaborationConfig:   *collabConfig,
-		cachedSources:         cSources,
-		cachedTransformations: cTransformations,
-		cachedDestinations:    cDestinations,
+		AddressGraph:        graph,
+		Collaborators:       collaborators,
+		collaborationConfig: *collabConfig,
 	}
 	return collaboration, nil
 }
 
-func (c *Collaboration) AuthorizeCollaborationEvent(collaboratorRef address.AddressRef, root address.AddressRef) (bool, error) {
-	// Authorization is permissible only for transformation and destination addresses.
-	// Source addresses are not authorized to access any other address.
-	// If collaborator wants to run transformation, it should pass the transformation address as root.
-	// If collaborator wants to download a destination it should pass the destination address as root.
-	visited := make(map[address.AddressRef]bool)
-	var parentTransformationRef address.AddressRef
-	if root.IsTransformation() {
-		parentTransformationRef = root
-	}
-	if root.IsDestination() {
-		// As movement from destination to Transformation is always allowed. We need to store its neighbouring transformation.
-		dAddress, ok := c.cachedDestinations[root].(*address.DestinationAddress)
-		if !ok {
-			return false, fmt.Errorf("could not cast address to destination address type: %v", string(root))
-		}
-		parentTransformationRef = address.AddressRef(dAddress.Destination.GetTransformationRef())
-	}
-	for _, neighbour := range c.AddressGraph.AdjacencyList[root] {
-		if visited[neighbour] {
-			continue
-		}
-		visited[neighbour] = true
-		movementPermission, err := c.Authorizer(collaboratorRef, neighbour, visited, parentTransformationRef)
-		if !movementPermission {
-			return false, err
-		}
-	}
-	return true, nil
-}
-
-func (c *Collaboration) Authorizer(collaboratorRef address.AddressRef, root address.AddressRef, visited map[address.AddressRef]bool, parentTransformationRef address.AddressRef) (bool, error) {
-	var err error
-	var movementPermission bool
-	if root.IsSource() {
-		sAddress, ok := c.cachedSources[root]
-		if !ok {
-			return false, fmt.Errorf("address with given address ref not found. %s", root)
-		}
-		log.Infof("Authorizing collaborator for source address. %s", root)
-		return sAddress.Authorize(collaboratorRef, parentTransformationRef)
-	}
-	for _, neighbour := range c.AddressGraph.AdjacencyList[root] {
-		if visited[neighbour] {
-			continue
-		}
-		visited[neighbour] = true
-		if root.IsTransformation() {
-			neighbourAddress, ok := c.cachedTransformations[root]
-			if !ok {
-				return false, fmt.Errorf("address with given address ref not found. %s", root)
-			}
-			log.Infof("Authorizing collaborator for transformation address. %s", root)
-			movementPermission, err = neighbourAddress.Authorize(collaboratorRef, "")
-			if err != nil {
-				log.Error(err)
-				return false, err
-			}
-		} else if root.IsDestination() {
-			neighbourAddress, ok := c.cachedDestinations[root]
-			if !ok {
-				return false, fmt.Errorf("address with given address ref not found. %s", root)
-			}
-			log.Infof("Authorizing collaborator for destination address. %s", root)
-			movementPermission, err = neighbourAddress.Authorize(collaboratorRef, "")
-			if err != nil {
-				log.Error(err)
-				return false, err
-			}
-		} else {
-			err = fmt.Errorf("invalid address type. %s", root)
-			log.Error(err)
-			return false, err
-		}
-		if !movementPermission {
-			return false, err
-		}
-		movementPermission, err = c.Authorizer(collaboratorRef, neighbour, visited, parentTransformationRef)
-	}
-	return movementPermission, err
-}
-
 // Compile Transformation will prepare a go_app package that will return the path for the same, Also the path of the output folder on where to put the results.
 func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, error) {
-	tDcrAdd, ok := c.cachedTransformations[tRef]
+	tDcrAdd, ok := c.AddressGraph.CachedTransformations[tRef]
 	if !ok {
 		return "", fmt.Errorf("address with given address ref not found. %s", tRef)
 	}
@@ -171,7 +83,7 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 	}
 	// Fill rest of the pongo inputs
 	for _, source := range sourceInfo {
-		sAddI := c.cachedSources[address.AddressRef(source.AddressRef)]
+		sAddI := c.AddressGraph.CachedSources[address.AddressRef(source.AddressRef)]
 		sAdd := sAddI.(*address.SourceAddress)
 		// Fill CSVLocations
 		for k := range pongoInputs {
@@ -192,6 +104,40 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 	}
 	// TODO- HardCoding outputPath will have to populate later.
 	return appLocation, nil
+}
+
+// This function returns the list ordered runnable events with the event increasing graph depth.
+// These events are yet to be authorized and are to be done by Authorizer when triggered by Service.
+// Runnable events are already authorized. All the unauthorized addresses and their corresponding dependent addresses should not show up in the topo Order.
+func (c *Collaboration) GetOrderedRunnableEvents() ([]Event, error) {
+	runnableRefs, err := c.AddressGraph.GetOrderedRunnableRefs()
+	if err != nil {
+		err := fmt.Errorf("err while getting ordered runnable refs: %s", err)
+		log.Error(err)
+		return nil, err
+	}
+
+	events := make([]Event, len(runnableRefs))
+	for i, ref := range runnableRefs {
+		if ref.IsDestination() {
+			event, err := NewSendDestinationEvent(c, ref)
+			if err != nil {
+				err = fmt.Errorf("err creating new destination event: %s", err)
+				log.Error(err)
+				return nil, err
+			}
+			events[i] = event
+		} else {
+			event, err := NewRunTransformationEvent(c, ref)
+			if err != nil {
+				err = fmt.Errorf("err creating new transformation event: %s", err)
+				log.Error(err)
+				return nil, err
+			}
+			events[i] = event
+		}
+	}
+	return events, nil
 }
 
 // This function validate noises for the members in the trust group.

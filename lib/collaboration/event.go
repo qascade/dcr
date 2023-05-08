@@ -37,6 +37,7 @@ type EventStatus struct {
 	ErrorMsg        error
 }
 
+// Transformation event is an event that runs a transformation. It is to be computed if Destination, is triggered.
 type TransformationEvent struct {
 	goAppLocation string
 	Result        string
@@ -176,32 +177,7 @@ func (de *DestinationEvent) Run() error {
 	return nil
 }
 
+// This function returns the status of the destination event
 func (de *DestinationEvent) Status() EventStatus {
 	return de.ParentTransformationEvent.Status()
-}
-
-// This function returns the list ordered runnable events with the event decreasing graph depth.
-// These events are yet to be authorized and are to be done by Authorizer when triggered by Service.
-func GetOrderedRunnableEvents(collab *Collaboration, runnableRefs []address.AddressRef) ([]Event, error) {
-	events := make([]Event, len(runnableRefs))
-	for i, ref := range runnableRefs {
-		if ref.IsDestination() {
-			event, err := NewSendDestinationEvent(collab, ref)
-			if err != nil {
-				err = fmt.Errorf("err creating new destination event: %s", err)
-				log.Error(err)
-				return nil, err
-			}
-			events[i] = event
-		} else {
-			event, err := NewRunTransformationEvent(collab, ref)
-			if err != nil {
-				err = fmt.Errorf("err creating new transformation event: %s", err)
-				log.Error(err)
-				return nil, err
-			}
-			events[i] = event
-		}
-	}
-	return events, nil
 }
