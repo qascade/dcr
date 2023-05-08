@@ -12,15 +12,15 @@ import (
 
 func TestGraph(t *testing.T) {
 	fmt.Println("Running TestCollaboration")
-	// testInitCollaborationPath, err := filepath.Abs("../../samples/init_collaboration")
-	// require.NoError(t, err)
+	testInitCollaborationPath, err := filepath.Abs("../../samples/init_collaboration")
+	require.NoError(t, err)
 
-	// testAddressGraph(t, testInitCollaborationPath)
+	testAddressGraph(t, testInitCollaborationPath)
 
-	// testOneDepthPath, err := filepath.Abs("../../samples/test_graph/test_onedepth")
-	// require.NoError(t, err)
+	testOneDepthPath, err := filepath.Abs("../../samples/test_graph/test_onedepth")
+	require.NoError(t, err)
 
-	// testAddressGraph(t, testOneDepthPath)
+	testAddressGraph(t, testOneDepthPath)
 
 	testTwoDepthPath, err := filepath.Abs("../../samples/test_graph/test_twodepth")
 	require.NoError(t, err)
@@ -29,13 +29,17 @@ func TestGraph(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
+	testInitCollaborationPath, err := filepath.Abs("../../samples/init_collaboration")
+	require.NoError(t, err)
+	testConfig(t, testInitCollaborationPath)
+
 	testOneDepthPath, err := filepath.Abs("../../samples/init_collaboration")
 	require.NoError(t, err)
 	testConfig(t, testOneDepthPath)
 
-	// testTwoDepthPath, err := filepath.Abs("../../samples/test_graph/test_twodepth")
-	// require.NoError(t, err)
-	// testConfig(t, testTwoDepthPath)
+	testTwoDepthPath, err := filepath.Abs("../../samples/test_graph/test_twodepth")
+	require.NoError(t, err)
+	testConfig(t, testTwoDepthPath)
 }
 
 func testAddressGraph(t *testing.T, pkgPath string) *Collaboration {

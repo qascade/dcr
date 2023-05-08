@@ -125,9 +125,10 @@ func (g *Graph) Authorizer(root AddressRef, parents []AddressRef, visited map[Ad
 		if !movementPermission {
 			return false, err
 		}
-		//parents = append(parents, neighbour)
-		//movementPermission, err = g.Authorizer(neighbour, parents, visited)
-		//g.AuthorityStatus[neighbour] = movementPermission
+		// TODO- Can we remove the redundant call to neighbour as a source?
+		// parents = append(parents, neighbour)
+		// movementPermission, err = g.Authorizer(neighbour, parents, visited)
+		// g.AuthorityStatus[neighbour] = movementPermission
 	}
 	return movementPermission, err
 }
