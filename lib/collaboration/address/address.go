@@ -89,28 +89,28 @@ type DcrAddress interface {
 }
 
 type SourceAddress struct {
-	Ref                 AddressRef
-	Source              source.Source
-	Owner               AddressRef //CollaboratorName
-	ConsumersAllowed    []AddressRef
-	DestinationsAllowed []AddressRef
-	SourceNoises        map[AddressRef]map[string]string
+	Ref                         AddressRef
+	Source                      source.Source
+	Owner                       AddressRef //CollaboratorName
+	TransformationOwnersAllowed []AddressRef
+	DestinationsAllowed         []AddressRef
+	SourceNoises                map[AddressRef]map[string]string
 }
 
-func NewSourceAddress(ref AddressRef, owner string, consumersAllowed []AddressRef, destAllowed []AddressRef, source source.Source, sourceNoises map[AddressRef]map[string]string) DcrAddress {
+func NewSourceAddress(ref AddressRef, owner string, transformationOwnersAllowed []AddressRef, destAllowed []AddressRef, source source.Source, sourceNoises map[AddressRef]map[string]string) DcrAddress {
 	// Owner is always allowed to consume its own source.
-	consumersAllowed = append(consumersAllowed, NewCollaboratorRef(owner))
+	transformationOwnersAllowed = append(transformationOwnersAllowed, NewCollaboratorRef(owner))
 	return &SourceAddress{
-		Ref:                 ref,
-		Owner:               NewCollaboratorRef(owner),
-		ConsumersAllowed:    consumersAllowed,
-		DestinationsAllowed: destAllowed,
-		Source:              source,
-		SourceNoises:        sourceNoises,
+		Ref:                         ref,
+		Owner:                       NewCollaboratorRef(owner),
+		TransformationOwnersAllowed: transformationOwnersAllowed,
+		DestinationsAllowed:         destAllowed,
+		Source:                      source,
+		SourceNoises:                sourceNoises,
 	}
 }
 
-// Transformaton Owner is checked against Source ConsumersAllowed.
+// Transformaton Owner is checked against Source TransformationOwnersAllowed.
 // Destination owner is checked against Source DestinationsAllowed.
 func (sa *SourceAddress) Authorize(parents []AddressRef, root AddressRef) (bool, error) {
 	for _, ref := range parents {
@@ -140,7 +140,7 @@ func (sa *SourceAddress) Authorize(parents []AddressRef, root AddressRef) (bool,
 func (sa *SourceAddress) AuthorizeTransformation(root AddressRef) (bool, error) {
 	tOwner := root.Collaborator()
 	tAllowed := false
-	for _, c := range sa.ConsumersAllowed {
+	for _, c := range sa.TransformationOwnersAllowed {
 		if c == tOwner {
 			tAllowed = true
 			break
@@ -176,30 +176,30 @@ func (sa *SourceAddress) Type() AddressType {
 }
 
 type TransformationAddress struct {
-	Ref                 AddressRef
-	Owner               AddressRef
-	ConsumersAllowed    []AddressRef
-	DestinationsAllowed []AddressRef
-	Transformation      transformation.Transformation
-	NoiseParams         []string
-	NoiseType           string
+	Ref                      AddressRef
+	Owner                    AddressRef
+	DestinationOwnersAllowed []AddressRef
+	DestinationsAllowed      []AddressRef
+	Transformation           transformation.Transformation
+	NoiseParams              []string
+	NoiseType                string
 }
 
-func NewTransformationAddress(ref AddressRef, owner string, consumersAllowed []AddressRef, destAllowed []AddressRef, t transformation.Transformation, noiseParams []string) DcrAddress {
+func NewTransformationAddress(ref AddressRef, owner string, destinationOwnersAllowed []AddressRef, destAllowed []AddressRef, t transformation.Transformation, noiseParams []string) DcrAddress {
 	// Owner is always allowed to consume its own transformation.
-	consumersAllowed = append(consumersAllowed, NewCollaboratorRef(owner))
+	destinationOwnersAllowed = append(destinationOwnersAllowed, NewCollaboratorRef(owner))
 	destAllowed = append(destAllowed, NewCollaboratorRef(owner))
 	return &TransformationAddress{
-		Ref:                 ref,
-		Owner:               NewCollaboratorRef(owner),
-		ConsumersAllowed:    consumersAllowed,
-		DestinationsAllowed: destAllowed,
-		Transformation:      t,
-		NoiseParams:         noiseParams,
+		Ref:                      ref,
+		Owner:                    NewCollaboratorRef(owner),
+		DestinationOwnersAllowed: destinationOwnersAllowed,
+		DestinationsAllowed:      destAllowed,
+		Transformation:           t,
+		NoiseParams:              noiseParams,
 	}
 }
 
-// Destination Owners are to checked against transformation ConsumersAllowed.
+// Destination Owners are to checked against transformation DestinationOwnersAllowed.
 func (ta *TransformationAddress) Authorize(parents []AddressRef, root AddressRef) (bool, error) {
 	log.Infof("Root %s is trying to consume transformation %s, Performing authorization", root, ta.Ref)
 	for _, ref := range parents {
@@ -220,7 +220,7 @@ func (ta *TransformationAddress) Authorize(parents []AddressRef, root AddressRef
 func (ta *TransformationAddress) AuthorizeDestination(root AddressRef) (bool, error) {
 	dAllowed := false
 	dOwner := root.Collaborator()
-	for _, ref := range ta.ConsumersAllowed {
+	for _, ref := range ta.DestinationOwnersAllowed {
 		if dOwner == ref {
 			dAllowed = true
 			break

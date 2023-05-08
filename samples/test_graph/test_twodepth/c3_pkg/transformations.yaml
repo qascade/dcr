@@ -10,5 +10,5 @@ transformations:
     noise_parameters: 
       - epsilon 
       - delta
-    consumer_allowed: 
+    destination_owners_allowed: 
       - c1

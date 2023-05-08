@@ -6,7 +6,7 @@ sources:
     columns:
       - name: col1 
         type: string
-    consumers_allowed: # who is allowed to use this source in transformation
+    transformation_owners_allowed: # who is allowed to use this source in transformation
       - c2
       - c1
     destinations_allowed: 

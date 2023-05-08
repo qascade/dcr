@@ -32,7 +32,7 @@ sources:
           - std_dev
         selectable: true
         join_key: false
-    consumers_allowed: # who is allowed to use this source in transformation
+    transformation_owners_allowed: # who is allowed to use this source in transformation
       - Research
     destinations_allowed: 
       - ref: /Research/destination/customer_overlap_count 

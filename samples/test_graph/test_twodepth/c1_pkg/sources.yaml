@@ -7,7 +7,7 @@ sources:
       - name: col1 
         type: string
         masking_type: sha256
-    consumers_allowed: 
+    transformation_owners_allowed: 
       - c2
     destinations_allowed: 
       - ref: /c3/destination/d1 

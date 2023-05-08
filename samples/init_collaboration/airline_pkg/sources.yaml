@@ -31,7 +31,7 @@ sources:
           - count
         selectable: true
         join_key: true
-    consumers_allowed: # who is allowed to write transformations on my sources. 
+    transformation_owners_allowed: # who is allowed to write transformations on my sources. 
       - Research
       - Media 
     destinations_allowed: 
