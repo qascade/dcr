@@ -53,7 +53,7 @@ func NewService(pkgPath string) (*Service, error) {
 	return service, nil
 }
 
-func (s *Service) Run() {
+func (s *Service) Run() error {
 	// Every event is already authorized to run
 	// Run all transformations and store them in ResultStore.
 	for _, event := range s.orderedCollabEvents {
@@ -67,7 +67,7 @@ func (s *Service) Run() {
 					statusType: NOT_READY,
 					ErrorMsg:   err.Error(),
 				}
-				return
+				return err
 			}
 			s.eventStatus[event] = EventStatus{
 				statusType: READY,
@@ -86,7 +86,7 @@ func (s *Service) Run() {
 					statusType: NOT_READY,
 					ErrorMsg:   err.Error(),
 				}
-				return
+				return err
 			}
 			s.eventStatus[event] = EventStatus{
 				statusType: READY,
@@ -94,6 +94,7 @@ func (s *Service) Run() {
 			}
 		}
 	}
+	return nil
 }
 
 func (s *Service) FetchResult(ref address.AddressRef) (string, error) {
