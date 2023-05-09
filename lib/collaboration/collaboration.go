@@ -70,12 +70,19 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 		return "", fmt.Errorf("could not cast address to transformation address type: %v", tDcrAdd)
 	}
 	// TODO - Add Authorizer code here.
+
+	dRef, err := c.findParentDestination(tRef)
+	if err != nil {
+		return "", err
+	}
+
 	t := tAdd.Transformation
 	appLocation := t.AppLocation()
 	sourceInfo := t.GetSourcesInfo()
 	pongoInputs := t.GetPongoInputs()
+
 	log.Info("Validating Noises as per trust Group Policy")
-	err := validateNoises(sourceInfo)
+	err = validateNoises(sourceInfo)
 	if err != nil {
 		err = fmt.Errorf("err source noises not compliant to trust group policy, %s", err)
 		log.Error(err)
@@ -88,7 +95,7 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 		// Fill CSVLocations
 		for k := range pongoInputs {
 			if pongoInputs[k] == "" {
-				noiseParams := sAdd.SourceNoises[tAdd.Ref]
+				noiseParams := sAdd.SourceNoises[dRef]
 				if _, ok := noiseParams[k]; ok {
 					pongoInputs[k] = noiseParams[k]
 				}
@@ -104,6 +111,24 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 	}
 	// TODO- HardCoding outputPath will have to populate later.
 	return appLocation, nil
+}
+
+func (c *Collaboration) findParentDestination(tRef address.AddressRef) (address.AddressRef, error) {
+	cDestinations := c.AddressGraph.CachedDestinations
+	for _, dest := range cDestinations {
+		dAdd, ok := dest.(*address.DestinationAddress)
+		if !ok {
+			err := fmt.Errorf("not able to convert %s to destination address type", dest)
+			log.Error(err)
+			return "", err
+		}
+		if string(tRef) == dAdd.Destination.GetTransformationRef() {
+			return dAdd.Ref, nil
+		}
+	}
+	err := fmt.Errorf("parent destination for transformation %s not found", tRef)
+	log.Error(err)
+	return "", err
 }
 
 // This function validate noises for the members in the trust group.

@@ -2,4 +2,5 @@ go 1.20
 
 use (
 	.
+	./samples/init_collaboration/research_pkg/go_app
 )

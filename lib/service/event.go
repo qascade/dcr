@@ -42,7 +42,7 @@ type Event interface {
 // This function returns the list ordered runnable events with the event increasing graph depth.
 // These events are yet to be authorized and are to be done by Authorizer when triggered by Service.
 // Runnable events are already authorized. All the unauthorized addresses and their corresponding dependent addresses should not show up in the topo Order.
-func GetOrderedRunnableEvents(collab *collaboration.Collaboration) ([]Event, error) {
+func GetOrderedRunnableEvents(collab *collaboration.Collaboration, resultStore *ResultStore) ([]Event, error) {
 	runnableRefs, err := collab.AddressGraph.GetOrderedRunnableRefs()
 	if err != nil {
 		err := fmt.Errorf("err while getting ordered runnable refs: %s", err)
@@ -60,7 +60,7 @@ func GetOrderedRunnableEvents(collab *collaboration.Collaboration) ([]Event, err
 				return nil, err
 			}
 			parentTRef := dAddI.(*address.DestinationAddress).Destination.GetTransformationRef()
-			dEvent, err := NewSendDestinationEvent(collab, ref, address.AddressRef(parentTRef))
+			dEvent, err := NewSendDestinationEvent(collab, ref, address.AddressRef(parentTRef), resultStore)
 			if err != nil {
 				err = fmt.Errorf("err creating new destination event: %s", err)
 				log.Error(err)
@@ -124,6 +124,13 @@ func (te *TransformationEvent) Run() (string, error) {
 		log.Error(err)
 		return "", err
 	}
+
+	tidyCmd := exec.Command("go", "mod", "tidy")
+	_, err = utils.RunCmd(tidyCmd)
+	if err != nil {
+		return "", nil
+	}
+
 	buildCmd := exec.Command("ego-go", "build", "main.go")
 	_, err = utils.RunCmd(buildCmd)
 	if err != nil {
@@ -184,10 +191,10 @@ type DestinationEvent struct {
 	status                  EventStatus
 	parentTransformationRef address.AddressRef
 	OutputLocation          string
-	ResultFetcher           ResultFetcher
+	ResultStore             *ResultStore
 }
 
-func NewSendDestinationEvent(collab *collaboration.Collaboration, ref address.AddressRef, parentTRef address.AddressRef) (Event, error) {
+func NewSendDestinationEvent(collab *collaboration.Collaboration, ref address.AddressRef, parentTRef address.AddressRef, resultStore *ResultStore) (Event, error) {
 	destAddI, err := collab.DeRefDestination(ref)
 	if err != nil {
 		err = fmt.Errorf("err dereferencing destination: %s", err)
@@ -216,6 +223,7 @@ func NewSendDestinationEvent(collab *collaboration.Collaboration, ref address.Ad
 		parentTransformationRef: parentTRef,
 		OutputLocation:          outputLocation,
 		eventType:               SEND_DESTINATION_EVENT_TYPE,
+		ResultStore:             resultStore,
 	}
 	return destEvent, nil
 }
@@ -224,11 +232,11 @@ func (de *DestinationEvent) Run() (string, error) {
 	outputPath := de.OutputLocation
 	outputPath = outputPath + "/results.txt"
 
-	output, err := de.ResultFetcher.FetchResult(de.parentTransformationRef)
-	if err != nil {
+	output, ok := de.ResultStore.Store[de.parentTransformationRef]
+	if !ok {
+		err := fmt.Errorf("result not found for transformaton %s in result store", de.parentTransformationRef)
 		return "", err
 	}
-	output = filterResults(output)
 	utils.WriteStringToFile(outputPath, output)
 	return "", nil
 }

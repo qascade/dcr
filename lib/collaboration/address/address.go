@@ -182,7 +182,6 @@ type TransformationAddress struct {
 	DestinationsAllowed      []AddressRef
 	Transformation           transformation.Transformation
 	NoiseParams              []string
-	NoiseType                string
 }
 
 func NewTransformationAddress(ref AddressRef, owner string, destinationOwnersAllowed []AddressRef, destAllowed []AddressRef, t transformation.Transformation, noiseParams []string) DcrAddress {

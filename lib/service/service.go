@@ -16,15 +16,21 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
+type ResultStore struct {
+	Store map[address.AddressRef]string
+}
+
+func NewResultStore() *ResultStore {
+	return &ResultStore{
+		Store: make(map[address.AddressRef]string),
+	}
+}
+
 type Service struct {
 	collaboration       *collaboration.Collaboration
 	orderedCollabEvents []Event
-	ResultStore         map[address.AddressRef]string
+	ResultStore         *ResultStore
 	eventStatus         map[Event]EventStatus
-}
-
-type ResultFetcher interface {
-	FetchResult(address.AddressRef) (string, error)
 }
 
 func NewService(pkgPath string) (*Service, error) {
@@ -34,8 +40,8 @@ func NewService(pkgPath string) (*Service, error) {
 		log.Error(err)
 		return nil, err
 	}
-
-	runnableEvents, err := GetOrderedRunnableEvents(collab)
+	resultStore := NewResultStore()
+	runnableEvents, err := GetOrderedRunnableEvents(collab, resultStore)
 	if err != nil {
 		err = fmt.Errorf("err getting runnable events: %s", err)
 		log.Error(err)
@@ -43,7 +49,7 @@ func NewService(pkgPath string) (*Service, error) {
 	}
 
 	eventStatus := make(map[Event]EventStatus)
-	resultStore := make(map[address.AddressRef]string)
+
 	service := &Service{
 		collaboration:       collab,
 		orderedCollabEvents: runnableEvents,
@@ -59,7 +65,7 @@ func (s *Service) Run() error {
 	for _, event := range s.orderedCollabEvents {
 		if event.Type() == RUN_TRANSFORMATION_EVENT_TYPE {
 			output, err := event.Run()
-			s.ResultStore[event.AddressRef()] = output
+			s.ResultStore.Store[event.AddressRef()] = output
 			if err != nil {
 				err = fmt.Errorf("err running event: %s", err)
 				log.Error(err)
@@ -95,13 +101,4 @@ func (s *Service) Run() error {
 		}
 	}
 	return nil
-}
-
-func (s *Service) FetchResult(ref address.AddressRef) (string, error) {
-	if val, ok := s.ResultStore[ref]; ok {
-		return val, nil
-	}
-	err := fmt.Errorf("err while fetching result for ref: %s", ref)
-	log.Error(err)
-	return "", err
 }

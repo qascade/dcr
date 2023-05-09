@@ -18,6 +18,7 @@ var runCmd = &cobra.Command{
 	Short: "Run Transformation and Destination",
 	Long:  `CLI Command to run mentioned transformation and destination`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		pkgPath := cmd.Flag("pkgpath").Value.String()
 		service, err := service.NewService(pkgPath)
 		if err != nil {
 			err = fmt.Errorf("err creating new service with package path: %s", pkgPath)
