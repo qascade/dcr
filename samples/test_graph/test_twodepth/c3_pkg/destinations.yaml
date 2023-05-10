@@ -1,0 +1,4 @@
+collaborator: c3
+destinations: 
+  - name: d1
+    ref: /c2/transformation/t1

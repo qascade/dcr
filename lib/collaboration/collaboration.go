@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/flosch/pongo2/v6"
 	log "github.com/sirupsen/logrus"
@@ -21,18 +20,15 @@ func init() {
 }
 
 type Collaboration struct {
-	AddressGraph          *address.Graph
-	Collaborators         []string
-	collaborationConfig   config.CollaborationConfig
-	cachedSources         map[address.AddressRef]address.DcrAddress
-	cachedTransformations map[address.AddressRef]address.DcrAddress
-	cachedDestination     map[address.AddressRef]address.DcrAddress
+	AddressGraph        *address.Graph
+	Collaborators       []string
+	collaborationConfig config.CollaborationConfig
 }
 
 func NewCollaboration(pkgPath string) (*Collaboration, error) {
 	var collaborators []string
 
-	collabConfig, err := config.ConfigParser(config.NewConfigFolder()).Parse(pkgPath)
+	collabConfig, err := config.Parser(config.NewCollaborationConfig()).Parse(pkgPath)
 	if err != nil {
 		err = fmt.Errorf("err parsing collaboration package with package path: %s", pkgPath)
 		log.Error(err)
@@ -46,111 +42,21 @@ func NewCollaboration(pkgPath string) (*Collaboration, error) {
 	cSources, cTransformations, cDestinations := address.CacheAddresses(*collabConfig)
 	graph, err := address.NewGraph(cSources, cTransformations, cDestinations)
 	if err != nil {
+		err = fmt.Errorf("err while topologically sorting the address graph: %s", err)
+		log.Error(err)
 		return nil, err
 	}
 	collaboration := &Collaboration{
-		AddressGraph:          graph,
-		Collaborators:         collaborators,
-		collaborationConfig:   *collabConfig,
-		cachedSources:         cSources,
-		cachedTransformations: cTransformations,
-		cachedDestination:     cDestinations,
+		AddressGraph:        graph,
+		Collaborators:       collaborators,
+		collaborationConfig: *collabConfig,
 	}
 	return collaboration, nil
 }
 
-func (c *Collaboration) AuthorizeCollaborationEvent(collaboratorRef address.AddressRef, root address.AddressRef) (bool, error) {
-	// Authorization is permissible only for transformation and destination addresses.
-	// Source addresses are not authorized to access any other address.
-	// If collaborator wants to run transformation, it should pass the transformation address as root.
-	// If collaborator wants to download a destination it should pass the destination address as root.
-	visited := make(map[address.AddressRef]bool)
-	var parentTransformationRef address.AddressRef
-	if strings.Contains(string(root), "transformation") {
-		parentTransformationRef = root
-	}
-	if strings.Contains(string(root), "destination") {
-		// As movement from destination to Transformation is always allowed. We need to store its neighbouring transformation.
-		dAddress, ok := c.cachedDestination[root].(*address.DestinationAddress)
-		if !ok {
-			return false, fmt.Errorf("could not cast address to destination address type: %v", string(root))
-		}
-		parentTransformationRef = address.AddressRef(dAddress.Destination.GetTransformationRef())
-	}
-	for _, neighbour := range c.AddressGraph.AdjacencyList[root] {
-		if visited[neighbour] {
-			continue
-		}
-		visited[neighbour] = true
-		movementPermission, err := c.Authorizer(collaboratorRef, neighbour, visited, parentTransformationRef)
-		if !movementPermission {
-			return false, err
-		}
-	}
-	return true, nil
-}
-
-func (c *Collaboration) Authorizer(collaboratorRef address.AddressRef, root address.AddressRef, visited map[address.AddressRef]bool, parentTransformationRef address.AddressRef) (bool, error) {
-	var err error
-	var movementPermission bool
-	if strings.Contains(string(root), "source") {
-		sAddress, ok := c.cachedSources[root]
-		if !ok {
-			return false, fmt.Errorf("address with given address ref not found. %s", root)
-		}
-		log.Infof("Authorizing collaborator for source address. %s", root)
-		return sAddress.Authorize(collaboratorRef, parentTransformationRef)
-	}
-	for _, neighbour := range c.AddressGraph.AdjacencyList[root] {
-		if visited[neighbour] {
-			continue
-		}
-		visited[neighbour] = true
-		if strings.Contains(string(root), "transformation") {
-			neighbourAddress, ok := c.cachedTransformations[root]
-			if !ok {
-				return false, fmt.Errorf("address with given address ref not found. %s", root)
-			}
-			log.Infof("Authorizing collaborator for transformation address. %s", root)
-			movementPermission, err = neighbourAddress.Authorize(collaboratorRef, "")
-			if err != nil {
-				log.Error(err)
-				return false, err
-			}
-		} else if strings.Contains(string(root), "destination") {
-			neighbourAddress, ok := c.cachedDestination[root]
-			if !ok {
-				return false, fmt.Errorf("address with given address ref not found. %s", root)
-			}
-			log.Infof("Authorizing collaborator for destination address. %s", root)
-			movementPermission, err = neighbourAddress.Authorize(collaboratorRef, "")
-			if err != nil {
-				log.Error(err)
-				return false, err
-			}
-		} else {
-			err = fmt.Errorf("invalid address type. %s", root)
-			log.Error(err)
-			return false, err
-		}
-		if !movementPermission {
-			return false, err
-		}
-		movementPermission, err = c.Authorizer(collaboratorRef, neighbour, visited, parentTransformationRef)
-	}
-	return movementPermission, err
-}
-
-func (c *Collaboration) DeRefTransformation(ref address.AddressRef) (*address.DcrAddress, error) {
-	if add, ok := c.cachedTransformations[ref]; ok {
-		return &add, nil
-	}
-	return nil, fmt.Errorf("transformation address not found. %s", ref)
-}
-
 // Compile Transformation will prepare a go_app package that will return the path for the same, Also the path of the output folder on where to put the results.
 func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, error) {
-	tDcrAdd, ok := c.cachedTransformations[tRef]
+	tDcrAdd, ok := c.AddressGraph.CachedTransformations[tRef]
 	if !ok {
 		return "", fmt.Errorf("address with given address ref not found. %s", tRef)
 	}
@@ -164,12 +70,19 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 		return "", fmt.Errorf("could not cast address to transformation address type: %v", tDcrAdd)
 	}
 	// TODO - Add Authorizer code here.
+
+	dRef, err := c.findParentDestination(tRef)
+	if err != nil {
+		return "", err
+	}
+
 	t := tAdd.Transformation
 	appLocation := t.AppLocation()
 	sourceInfo := t.GetSourcesInfo()
 	pongoInputs := t.GetPongoInputs()
+
 	log.Info("Validating Noises as per trust Group Policy")
-	err := validateNoises(sourceInfo)
+	err = validateNoises(sourceInfo)
 	if err != nil {
 		err = fmt.Errorf("err source noises not compliant to trust group policy, %s", err)
 		log.Error(err)
@@ -177,23 +90,21 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 	}
 	// Fill rest of the pongo inputs
 	for _, source := range sourceInfo {
-		sAddI := c.cachedSources[address.AddressRef(source.AddressRef)]
+		sAddI := c.AddressGraph.CachedSources[address.AddressRef(source.AddressRef)]
 		sAdd := sAddI.(*address.SourceAddress)
 		// Fill CSVLocations
 		for k := range pongoInputs {
 			if pongoInputs[k] == "" {
-				noiseParams := sAdd.SourceNoises[tAdd.Ref]
+				noiseParams := sAdd.SourceNoises[dRef]
 				if _, ok := noiseParams[k]; ok {
 					pongoInputs[k] = noiseParams[k]
 				}
 			}
 			if k == source.LocationPongoInput {
-				// TODO - fill absolute path only from yaml.
 				pongoInputs[k] = sAdd.Source.Extract()
 			}
 		}
 	}
-	//pongoInputs["uniqueId"] =
 	_, err = prepareGoApp(appLocation, pongoInputs)
 	if err != nil {
 		return "", err
@@ -202,8 +113,28 @@ func (c *Collaboration) CompileTransformation(tRef address.AddressRef) (string, 
 	return appLocation, nil
 }
 
+func (c *Collaboration) findParentDestination(tRef address.AddressRef) (address.AddressRef, error) {
+	cDestinations := c.AddressGraph.CachedDestinations
+	for _, dest := range cDestinations {
+		dAdd, ok := dest.(*address.DestinationAddress)
+		if !ok {
+			err := fmt.Errorf("not able to convert %s to destination address type", dest)
+			log.Error(err)
+			return "", err
+		}
+		if string(tRef) == dAdd.Destination.GetTransformationRef() {
+			return dAdd.Ref, nil
+		}
+	}
+	err := fmt.Errorf("parent destination for transformation %s not found", tRef)
+	log.Error(err)
+	return "", err
+}
+
+// This function validate noises for the members in the trust group.
+// A trust group is a set of sources who have given permission to the same transformation.
 func validateNoises(sourceInfo []transformation.SourceMetadata) error {
-	// This validateNoises will also need all the list of collaborators who gives permission to same transformation.
+	// This validateNoises will also need all the list of collaborators who gives permission to same destination.
 	// This list will be fetched from address graph. All these collaborators will form a Trust Group
 	// After this we will have three options for noise Validation/Propagation
 	// 1. Only one collaborator from the trust Group is allowed to define noises.
@@ -217,8 +148,6 @@ func validateNoises(sourceInfo []transformation.SourceMetadata) error {
 }
 
 func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, error) {
-	// TODO - Add the code to prepare the go app.
-	//	tpl, err := pongo2.FromFile(appLocation)
 	ctx := pongo2.Context{}
 	for k, v := range pongoInputs {
 		ctx[k] = v
@@ -264,16 +193,4 @@ func prepareGoApp(appLocation string, pongoInputs map[string]string) (string, er
 		return "", err
 	}
 	return compiledMainPath, nil
-}
-
-func (c *Collaboration) GetOutputPath(destOwner address.AddressRef) (string, error) {
-	owner := string(destOwner)
-	owner = owner[1:]
-	pkgInfo, ok := c.collaborationConfig.PackagesInfo[owner]
-	if !ok {
-		err := fmt.Errorf("collaborator with name: %s does not exist", owner)
-		log.Error(err)
-		return "", err
-	}
-	return pkgInfo.PkgPath, nil
 }

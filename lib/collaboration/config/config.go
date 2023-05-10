@@ -20,15 +20,14 @@ func init() {
 	log.SetOutput(os.Stdout)
 }
 
-type ConfigParser interface {
+type Parser interface {
 	Parse(path string) (*CollaborationConfig, error)
 }
 
-// ConfigFolder is the root folder for all the config files and implements ConfigParser.
-type ConfigFolder struct{}
+// CollaborationConfig is the root folder for all the config files and implements Parser.
 
-func NewConfigFolder() ConfigFolder {
-	return ConfigFolder{}
+func NewCollaborationConfig() CollaborationConfig {
+	return CollaborationConfig{}
 }
 
 // All the Specs associated with a single Collaborator
@@ -46,7 +45,7 @@ type PackageConfig struct {
 	DestinationGroupSpec    *DestinationGroupSpec
 }
 
-func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
+func (c CollaborationConfig) Parse(path string) (*CollaborationConfig, error) {
 	log.Infof("Parsing the config folder with path %s", path)
 	var err error
 	path, err = filepath.Abs(path)
@@ -88,7 +87,7 @@ func (c ConfigFolder) Parse(path string) (*CollaborationConfig, error) {
 	return collabConfig, nil
 }
 
-func (c *ConfigFolder) newPackageConfig(pkgPath string) (*PackageConfig, error) {
+func (c *CollaborationConfig) newPackageConfig(pkgPath string) (*PackageConfig, error) {
 	log.Infof("Creating new Package Config for pkgPath %s", pkgPath)
 	sSpec, err := c.parseSourceSpec(pkgPath)
 	if err != nil {
@@ -120,7 +119,7 @@ func (c *ConfigFolder) newPackageConfig(pkgPath string) (*PackageConfig, error) 
 	}
 	return pkgConfig, nil
 }
-func (c *ConfigFolder) parseSourceSpec(path string) (*SourceGroupSpec, error) {
+func (c *CollaborationConfig) parseSourceSpec(path string) (*SourceGroupSpec, error) {
 	sourceYamlPath := path + "/sources.yaml"
 	sourceSpecB, err := os.ReadFile(sourceYamlPath)
 	if err != nil {
@@ -146,7 +145,7 @@ func (c *ConfigFolder) parseSourceSpec(path string) (*SourceGroupSpec, error) {
 	return &sResult, nil
 }
 
-func (c *ConfigFolder) parseTransformationSpec(path string) (*TransformationGroupSpec, error) {
+func (c *CollaborationConfig) parseTransformationSpec(path string) (*TransformationGroupSpec, error) {
 	transformationYamlPath := path + "/transformations.yaml"
 	transformationSpecB, err := os.ReadFile(transformationYamlPath)
 	if err != nil {
@@ -172,7 +171,7 @@ func (c *ConfigFolder) parseTransformationSpec(path string) (*TransformationGrou
 	return &tResult, nil
 }
 
-func (c *ConfigFolder) parseDestinationSpec(path string) (*DestinationGroupSpec, error) {
+func (c *CollaborationConfig) parseDestinationSpec(path string) (*DestinationGroupSpec, error) {
 	destinationYamlPath := path + "/destinations.yaml"
 	destinationSpecB, err := os.ReadFile(destinationYamlPath)
 	if err != nil {

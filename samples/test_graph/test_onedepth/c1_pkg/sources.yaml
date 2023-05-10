@@ -1,0 +1,16 @@
+collaborator: c1
+sources: 
+  - name: s1
+    csv_location: c1_s1_loc
+    description: table having data for c1/s1
+    columns:
+      - name: col1 
+        type: string
+        masking_type: sha256
+    transformation_owners_allowed: 
+      - c2
+    destinations_allowed: 
+      - ref: /c3/destination/d1 
+        noise_parameters: 
+          - epsilon: ln3 
+          - delta: 1e-4

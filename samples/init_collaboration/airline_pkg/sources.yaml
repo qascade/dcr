@@ -31,11 +31,11 @@ sources:
           - count
         selectable: true
         join_key: true
-    consumers_allowed: # who is allowed to write transformations on my sources. 
+    transformation_owners_allowed: # who is allowed to write transformations on my sources. 
       - Research
-      - Media  
+      - Media 
     destinations_allowed: 
-      - ref: /Research/transformation/private_total_customers 
+      - ref: /Research/destination/customer_overlap_count 
         noise_parameters: 
           - noiseType: Laplace
           - epsilon: math.Log(2) 

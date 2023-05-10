@@ -10,16 +10,17 @@ type TransformationGroupSpec struct {
 // For now only supporting Count Query.
 // TODO - Make this Spec such that any type of transformation can be parsed using this spec.
 type TransformationSpec struct {
-	Name               string     `yaml:"name"`
-	Type               string     `yaml:"type"`
-	UniqueId           string     `yaml:"unique_id"`
-	AppLocation        string     `yaml:"app_location"`
-	From               []FromSpec `yaml:"from"`
-	JoinKey            string     `yaml:"join_key"`
-	NoiseParams        []string   `yaml:"noise_parameters,omitempty"`
-	Template           string     `yaml:"template,omitempty"`
-	ConsumerAllowed    []string   `yaml:"consumer_allowed"`
-	DestinationAllowed []string   `yaml:"destination_allowed"`
+	Name                     string     `yaml:"name"`
+	Type                     string     `yaml:"type"`
+	UniqueId                 string     `yaml:"unique_id,omitempty"`
+	AppLocation              string     `yaml:"app_location"`
+	From                     []FromSpec `yaml:"from"`
+	JoinKey                  string     `yaml:"join_key,omitempty"`
+	NoiseParams              []string   `yaml:"noise_parameters,omitempty"`
+	Template                 string     `yaml:"template,omitempty"`
+	DestinationOwnersAllowed []string   `yaml:"destination_owners_allowed"`
+	// TODO - do we need access control at destination level granularity?
+	DestinationsAllowed []string `yaml:"destination_allowed,omitempty"`
 }
 
 type SourceGroupSpec struct {
@@ -33,17 +34,17 @@ type SourceSpec struct {
 	Description string       `yaml:"description"`
 	Columns     []ColumnSpec `yaml:"columns"`
 	// TODO- Do we need to add addressRef here?
-	ConsumersAllowed    []string                       `yaml:"consumers_allowed"`
-	DestinationsAllowed []SourceDestinationAllowedSpec `yaml:"destinations_allowed"`
+	TransformationOwnersAllowed []string                       `yaml:"transformation_owners_allowed"`
+	DestinationsAllowed         []SourceDestinationAllowedSpec `yaml:"destinations_allowed"`
 }
 
 type ColumnSpec struct {
 	Name              string   `yaml:"name"`
 	Type              string   `yaml:"type"`
 	MaskingType       string   `yaml:"masking_type"`
-	Selectable        bool     `yaml:"selectable"`
+	Selectable        bool     `yaml:"selectable,omitempty"`
 	AggregatesAllowed []string `yaml:"aggregates_allowed,omitempty"`
-	JoinKey           bool     `yaml:"join_key"`
+	JoinKey           bool     `yaml:"join_key,omitempty"`
 }
 
 type DestinationGroupSpec struct {

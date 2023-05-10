@@ -7,10 +7,6 @@ import (
 	"github.com/qascade/dcr/lib/collaboration/config"
 )
 
-const (
-	COLLABORATION_FOLDER_NAME = "collaboration"
-)
-
 type AddressType string
 
 const (
@@ -37,14 +33,14 @@ func CacheAddresses(collabConfig config.CollaborationConfig) (map[AddressRef]Dcr
 			s := source.NewLocalSource(collaboratorName, sSpec)
 			//noiseParams := extractNoiseParams(sSpec)
 			ref := Abs(sSpec.Name, collaboratorName, ADDRESS_TYPE_SOURCE)
-			sAddress := NewSourceAddress(ref, collaboratorName, getAddressRefSlice(sSpec.ConsumersAllowed), getTransformationRefSlice(sSpec.DestinationsAllowed), s, registerSourceNoises(sSpec.DestinationsAllowed))
+			sAddress := NewSourceAddress(ref, collaboratorName, getAddressRefSlice(sSpec.TransformationOwnersAllowed), getTransformationRefSlice(sSpec.DestinationsAllowed), s, registerSourceNoises(sSpec.DestinationsAllowed))
 			cSources[ref] = sAddress
 		}
 
 		for _, tSpec := range pkgConfig.TransformationGroupSpec.Transformations {
 			t := transformation.NewGoApp(collaboratorName, tSpec)
 			ref := Abs(tSpec.Name, collaboratorName, ADDRESS_TYPE_TRANSFORMATION)
-			tAddress := NewTransformationAddress(ref, collaboratorName, getAddressRefSlice(tSpec.ConsumerAllowed), getAddressRefSlice(tSpec.DestinationAllowed), t, tSpec.NoiseParams)
+			tAddress := NewTransformationAddress(ref, collaboratorName, getAddressRefSlice(tSpec.DestinationOwnersAllowed), getAddressRefSlice(tSpec.DestinationsAllowed), t, tSpec.NoiseParams)
 			cTransformations[ref] = tAddress
 		}
 

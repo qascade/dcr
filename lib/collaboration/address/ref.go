@@ -2,9 +2,15 @@ package address
 
 import (
 	"os"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	log.SetLevel(log.DebugLevel)
+	log.SetOutput(os.Stdout)
+}
 
 // AddressRef structure:
 // /<collaboration_id>/<collaborator_name>/<address_type>/<address_name>
@@ -12,9 +18,26 @@ import (
 // <collaboration_id>: <collaboration_name>_HASH
 type AddressRef string
 
-func init() {
-	log.SetLevel(log.DebugLevel)
-	log.SetOutput(os.Stdout)
+func (a AddressRef) IsSource() bool {
+	return strings.Contains(string(a), string(ADDRESS_TYPE_SOURCE))
+}
+
+func (a AddressRef) IsTransformation() bool {
+	return strings.Contains(string(a), string(ADDRESS_TYPE_TRANSFORMATION))
+}
+
+func (a AddressRef) IsDestination() bool {
+	return strings.Contains(string(a), string(ADDRESS_TYPE_DESTINATION))
+}
+
+func (a AddressRef) Collaborator() AddressRef {
+	s := strings.Split(string(a), "/")
+	return AddressRef("/" + s[1])
+}
+
+func (a AddressType) Name() string {
+	s := strings.Split(string(a), "/")
+	return s[2]
 }
 
 // This function will take in the name of the address and the name of the collaborator and return the absolute addressRef

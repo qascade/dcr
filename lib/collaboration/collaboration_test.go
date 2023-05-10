@@ -10,47 +10,62 @@ import (
 	"github.com/qascade/dcr/lib/collaboration/config"
 )
 
-func TestCollaboration(t *testing.T) {
+func TestGraph(t *testing.T) {
 	fmt.Println("Running TestCollaboration")
-	testPath1, err := filepath.Abs("../../samples/test_collaboration")
+	testInitCollaborationPath, err := filepath.Abs("../../samples/init_collaboration")
 	require.NoError(t, err)
 
-	testPath2, err := filepath.Abs("../../samples/init_collaboration")
+	testAddressGraph(t, testInitCollaborationPath)
+
+	testOneDepthPath, err := filepath.Abs("../../samples/test_graph/test_onedepth")
 	require.NoError(t, err)
-	testCompile(t, testPath1)
-	testCompile(t, testPath2)
+
+	testAddressGraph(t, testOneDepthPath)
+
+	testTwoDepthPath, err := filepath.Abs("../../samples/test_graph/test_twodepth")
+	require.NoError(t, err)
+
+	testAddressGraph(t, testTwoDepthPath)
 }
 
-func testCompile(t *testing.T, path string) {
-	fmt.Println("Running TestCompile")
-	testConfig(t, path)
-	//testAddressGraph(t, path)
+func TestParse(t *testing.T) {
+	testInitCollaborationPath, err := filepath.Abs("../../samples/init_collaboration")
+	require.NoError(t, err)
+	testConfig(t, testInitCollaborationPath)
+
+	testOneDepthPath, err := filepath.Abs("../../samples/init_collaboration")
+	require.NoError(t, err)
+	testConfig(t, testOneDepthPath)
+
+	testTwoDepthPath, err := filepath.Abs("../../samples/test_graph/test_twodepth")
+	require.NoError(t, err)
+	testConfig(t, testTwoDepthPath)
 }
 
 func testAddressGraph(t *testing.T, pkgPath string) *Collaboration {
-	fmt.Println("Running TestAddressGraph")
+	fmt.Printf("Running TestAddressGraph, for pkgPath = %s\n", pkgPath)
 	collaboration, err := NewCollaboration(pkgPath)
 	require.NoError(t, err)
+	graph := *collaboration.AddressGraph
+
 	fmt.Println("AddressGraph =============")
-	fmt.Println(*collaboration.AddressGraph)
+	fmt.Println("Count of AddressNodes =============")
+	fmt.Println(graph.Count)
+	fmt.Println("AdjacencyList =============")
+	fmt.Println(graph.AdjacencyList)
+
+	refs, err := graph.GetOrderedRunnableRefs()
+	require.NoError(t, err)
+	fmt.Println("OrderedRunnableRefs =============")
+	fmt.Println(refs)
+	fmt.Println("AuthorityStatus =============")
+	fmt.Println(graph.AuthorityStatus)
 	require.NotNil(t, collaboration.AddressGraph)
 	return collaboration
 }
 
 func testConfig(t *testing.T, path string) *config.CollaborationConfig {
-	fmt.Println("Running TestConfig")
-	parser := config.ConfigParser(config.ConfigFolder{})
-	_, err := parser.Parse(path)
-	require.NoError(t, err)
-	// for _, pkg := range pkgConfig.PackagesInfo {
-	// 	fmt.Println("SourceSpec =============")
-	// 	fmt.Println(*pkg.SourceSpec)
-	// 	fmt.Println("DestinationSpec =============")
-	// 	fmt.Println(*pkg.DestinationGroupSpec)
-	// 	fmt.Println("TransformationSpec =============")
-	// 	fmt.Println(*pkg.TransformationGroupSpec)
-	// }
-
+	parser := config.Parser(config.NewCollaborationConfig())
 	pkgConfig, err := parser.Parse(path)
 	require.NoError(t, err)
 	for _, pkg := range pkgConfig.PackagesInfo {

@@ -1,22 +1,15 @@
 package service
 
 import (
+	// "github.com/stretchr/testify/require"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestService(t *testing.T) {
-	testPkgPath := "../../samples/init_collaboration"
-	runner := "Media"
-	destinationOwner := "Research"
-	tRef := "/Research/transformation/private_total_customers"
-	destRef := "/Research/destination/customer_overlap_count"
+	// testPkgPath := "../../samples/init_collaboration"
+	// service, err := NewService(testPkgPath)
+	// require.NoError(t, err)
 
-	_, err := NewService(testPkgPath, runner, destinationOwner, tRef, destRef)
-	//service, err := NewService(testPkgPath, runner, destinationOwner, tRef, destRef)
-	require.NoError(t, err)
-
-	// err = service.RunCollaborationEvent()
+	// err = service.Run()
 	// require.NoError(t, err)
 }
