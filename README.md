@@ -10,6 +10,25 @@ NOTE:
 4. The Code is not production ready and does not partake any security measures other than access control and differential privacy. 
 5. The library is still not tested on actual SGX backed machines and but the PoC can be tested on simulation mode. 
 
+To Run this demonstration: 
+1. Make sure you have [Intel-SGX](https://github.com/intel/linux-sgx-driver) SDK installed. 
+2. Make sure you have Go 1.20 installed. 
+
+You can see the sample collaboration package in samples/init_collaboration. 
+
+## To Run the demonstration: 
+1. Build the `dcr` binary.
+```bash 
+    make build 
+```
+
+2. Run the demonstration 
+```bash
+    ./dcr run --pkgpath samples/init_collaboration
+```
+
+
+
 Links: 
 1. [Spec Doc](https://www.notion.so/Clean-Room-Spec-Doc-f606d90163ff4ca9b14bae92c0db328d?d=78e16509ae124e7db6777a751a72cbb3#6e16fc663e0147f6b844030c4ce9fac8)
 2. [Implementation Plan](https://www.notion.so/Implementation-Plan-e105e6e1a2d94d4ba6547cab5705ab20?pvs=4)
