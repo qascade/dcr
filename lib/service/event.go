@@ -168,6 +168,7 @@ func (te *TransformationEvent) Run() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	filterIntelPrompts(output)
 	output = filterResults(output)
 	te.Result = output
 	return output, nil
@@ -259,4 +260,10 @@ func filterResults(output string) string {
 	s := strings.Split(output, " ")
 	n := len(s)
 	return fmt.Sprintf("NonPrivateCount:%s PrivateCount:%s", strings.TrimLeft(s[n-2], "...\n"), strings.Trim(s[n-1], "\n"))
+}
+func filterIntelPrompts(output string) {
+	s := strings.Split(output, "\n")
+	fmt.Println(s[0])
+	fmt.Println(s[1])
+	fmt.Println(s[2])
 }
