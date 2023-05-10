@@ -1,4 +1,10 @@
-# dcr
+# dcr ⭐️
+
+[![forthebadge](http://forthebadge.com/images/badges/made-with-go.svg)](http://forthebadge.com)
+[![forthebadge](http://forthebadge.com/images/badges/built-with-love.svg)](http://forthebadge.com)
+
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=shields)](http://makeapullrequest.com)
+
 A proof of concept framework to orchestrate Interoperable Differentially Private Data Clean Room Services on Intel SGX.
 
 A Data Clean Room is a secure environment where organizations can collect data from multiple sources and combine it with their first-party data. Doing so allows marketers to leverage large, aggregated datasets of consumer behavior to provide insight into critical factors like performance, demographics, campaigns, etc.
@@ -21,8 +27,8 @@ To Run an example Data Clean Room Scenario.
 
 You can see the sample collaboration package in samples/init_collaboration. You can also look at some sample packages under construction along with their graph images in samples/test_graph
 
-## To Run the demonstration: 
-1. Build the `dcr` binary.
+## ⚡️ Quick Start: 
+1. 🏗 Build the `dcr` binary.
 ```bash 
 make build 
 ```
@@ -30,7 +36,7 @@ make build
 
 <img width="1119" alt="Screenshot 2023-05-11 at 4 10 33 AM" src="https://github.com/qascade/dcr/assets/92882879/8cd81896-cfd8-4724-85aa-afd7b2829c9b">
 
-2. Run the demonstration 
+2. 🏃🏻‍♀️ Run the demonstration 
 ```bash
 ./dcr run --pkgpath samples/init_collaboration
 ```
