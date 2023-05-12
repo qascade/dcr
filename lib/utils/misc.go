@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -12,6 +13,24 @@ func UnmarshalStrict(in []byte, out interface{}) (err error) {
 	knownFieldsDecoder := yaml.NewDecoder(bytes.NewReader(in))
 	knownFieldsDecoder.KnownFields(true)
 	return knownFieldsDecoder.Decode(out)
+}
+
+func ChangeDirTo(path string) {
+	// Change the working directory to the specified path
+	err := os.Chdir(path)
+	fmt.Print("changing directory to tranformation_code :", path)
+	fmt.Print("\n")
+	if err != nil {
+		fmt.Print(err)
+	}
+}
+
+func DeleteTempFolder(tempFolderPath string) {
+	// testFolderPath := "../go_tranformations/test.zip"
+	err := os.RemoveAll(tempFolderPath)
+	if err != nil {
+		fmt.Errorf("not able to remove %s", tempFolderPath)
+	}
 }
 
 func CopyFile(sourceFile, destinationFolder string) error {

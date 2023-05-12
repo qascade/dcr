@@ -18,7 +18,7 @@ func TestCollaboration(t *testing.T) {
 	collaboration := testAddressGraph(t, collabConfig)
 	testAuthorization(t, collaboration)
 	appPath := testCompile(t, collaboration)
-	err := service.SendRequestToServer(appPath)
+	err := service.SendRequestToServer2(appPath, "211212223e1311")
 	require.NoError(t, err)
 }
 
