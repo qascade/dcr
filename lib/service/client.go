@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -52,9 +53,17 @@ func SendRequestToServer(folderPath string, ref string) error {
 		return err
 	}
 
-	// Create a multipart form with the ZIP file
+	// Create a multipart form with the ZIP file and the string value
 	var requestBody bytes.Buffer
 	multipartWriter := multipart.NewWriter(&requestBody)
+
+	// Add the string value as a form field
+	err = multipartWriter.WriteField("refid", ref)
+	if err != nil {
+		return err
+	}
+
+	// Add the ZIP file as a form field
 	zipFile, err := multipartWriter.CreateFormFile("file", "test.zip")
 	if err != nil {
 		return err
@@ -67,9 +76,9 @@ func SendRequestToServer(folderPath string, ref string) error {
 	if err != nil {
 		return err
 	}
-	runReqUrl := "https://a08d-117-98-96-203.in.ngrok.io/run"
+
 	// Create a POST request to the /run endpoint of the API
-	req, err := http.NewRequest("POST", runReqUrl, &requestBody)
+	req, err := http.NewRequest("POST", "https://bb53-117-98-96-74.in.ngrok.io/run", &requestBody)
 	if err != nil {
 		return err
 	}
@@ -97,5 +106,34 @@ func SendRequestToServer(folderPath string, ref string) error {
 }
 
 func AskForResult(addressRef string) (string, error) {
+	// Set the URL with the refid parameter
+	// refid := "123456"
+	url := fmt.Sprintf("https://bb53-117-98-96-74.in.ngrok.io/download?refid=%s", addressRef)
+
+	// Create the GET request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+
+	}
+
+	// Send the request using the default client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response:", err)
+
+	}
+
+	// Print the response body
+	fmt.Println(string(body))
 	return "", nil
 }
