@@ -1,0 +1,42 @@
+collaborator: Airline #name of collaborator 
+sources: 
+  - name: Airline_customers
+    csv_location: ./airline_customers.csv
+    description: table having data for airline customers
+    columns:
+      - name: email 
+        type: string
+        masking_type: sha256
+        selectable: false # can you run select query on this col
+        aggregates_allowed: # no other aggregates are to be allowed. 
+          - private_count
+          - private_count_distinct  
+        join_key: true # can this column be used as a join_key
+      - name: phone_number # if aggregates_allowed not mentioned assume aggregates not allowed. 
+        type: string 
+        masking_type: sha256
+        selectable: false
+        join_key: true 
+      - name: zip 
+        type: string 
+        making_type: none
+        selectable: true
+        aggregates_allowed: 
+          - count 
+        join_key: false 
+      - name: pets
+        type: string 
+        masking_type: none
+        aggregates_allowed: 
+          - count
+        selectable: true
+        join_key: true
+    transformation_owners_allowed: # who is allowed to write transformations on my sources. 
+      - Research
+      - Media 
+    destinations_allowed: 
+      - ref: /Research/destination/customer_overlap_count 
+        noise_parameters: 
+          - noiseType: Laplace
+          - epsilon: math.Log(2) 
+          - maxPartitionPerUser: 1 

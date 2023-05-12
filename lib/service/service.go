@@ -64,8 +64,8 @@ func (s *Service) Run() error {
 	// Run all transformations and store them in ResultStore.
 	for _, event := range s.orderedCollabEvents {
 		if event.Type() == RUN_TRANSFORMATION_EVENT_TYPE {
-			output, err := event.Run()
-			s.ResultStore.Store[event.AddressRef()] = output
+			err := event.Run()
+			//s.ResultStore.Store[event.AddressRef()] = output
 			if err != nil {
 				err = fmt.Errorf("err running event: %s", err)
 				log.Error(err)
@@ -84,7 +84,7 @@ func (s *Service) Run() error {
 
 	for _, event := range s.orderedCollabEvents {
 		if event.Type() == SEND_DESTINATION_EVENT_TYPE {
-			_, err := event.Run()
+			err := event.Run()
 			if err != nil {
 				err = fmt.Errorf("err running event: %s", err)
 				log.Error(err)

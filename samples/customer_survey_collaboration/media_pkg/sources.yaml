@@ -1,0 +1,42 @@
+collaborator: Media #name of collaborator 
+sources: 
+  - name: Media_customers
+    csv_location: ./media_customers.csv
+    description: table having data for media customer
+    columns:
+      - name: email 
+        type: string
+        masking_type: sha256
+        selectable: true # can you run select query on this col
+        aggregates_allowed: # no other aggregates are to be allowed. 
+          - private_count
+          - private_count_distinct  
+        join_key: true # can this column be used as a join_key
+      - name: phone_number # if aggregates_allowed not mentioned assume aggregates not allowed. 
+        type: string 
+        masking_type: sha256
+        selectable: false
+        join_key: true 
+      - name: zip 
+        type: string 
+        selectable: true
+        aggregates_allowed: 
+          - count 
+        masking_type: none
+        join_key: false 
+      - name: age_band
+        type: number 
+        masking_type: none
+        aggregates_allowed: 
+          - private_avg
+          - std_dev
+        selectable: true
+        join_key: false
+    transformation_owners_allowed: # who is allowed to use this source in transformation
+      - Research
+    destinations_allowed: 
+      - ref: /Research/destination/customer_overlap_count 
+        noise_parameters: 
+          - noiseType: Laplace
+          - epsilon: math.Log(2) 
+          - maxPartitionsPerUser: 1

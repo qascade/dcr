@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -33,7 +32,7 @@ const (
 )
 
 type Event interface {
-	Run() (string, error)
+	Run() error
 	Status() EventStatus
 	Type() EventType
 	AddressRef() address.AddressRef
@@ -117,61 +116,67 @@ func NewRunTransformationEvent(collab *collaboration.Collaboration, ref address.
 //go:embed temp_enclave.json
 var newEnclaveContent string
 
-func (te *TransformationEvent) Run() (string, error) {
-	err := os.Chdir(te.goAppLocation)
+func (te *TransformationEvent) Run() error {
+	// err := os.Chdir(te.goAppLocation)
+	// if err != nil {
+	// 	err = fmt.Errorf("couldn't change directory path to %s", te.goAppLocation)
+	// 	log.Error(err)
+	// 	return "", err
+	// }
+	err := SendRequestToServer(te.goAppLocation, string(te.ref))
 	if err != nil {
-		err = fmt.Errorf("couldn't change directory path to %s", te.goAppLocation)
+		err = fmt.Errorf("err sending request to remote ego server, %s", err)
 		log.Error(err)
-		return "", err
+		return err
 	}
+	// tidyCmd := exec.Command("go", "mod", "tidy")
+	// _, err = utils.RunCmd(tidyCmd)
+	// if err != nil {
+	// 	return "", nil
+	// }
 
-	tidyCmd := exec.Command("go", "mod", "tidy")
-	_, err = utils.RunCmd(tidyCmd)
-	if err != nil {
-		return "", nil
-	}
+	// buildCmd := exec.Command("ego-go", "build", "main.go")
+	// _, err = utils.RunCmd(buildCmd)
+	// if err != nil {
+	// 	return "", err
+	// }
 
-	buildCmd := exec.Command("ego-go", "build", "main.go")
-	_, err = utils.RunCmd(buildCmd)
-	if err != nil {
-		return "", err
-	}
+	// signCmd := exec.Command("ego", "sign", "main")
+	// _, err = utils.RunCmd(signCmd)
+	// if err != nil {
+	// 	return "", err
+	// }
 
-	signCmd := exec.Command("ego", "sign", "main")
-	_, err = utils.RunCmd(signCmd)
-	if err != nil {
-		return "", err
-	}
+	// // Put harcoded csv names to enclave.json
+	// oldEnclave := "./enclave.json"
+	// err = utils.Remove(oldEnclave)
+	// if err != nil {
+	// 	return "", err
+	// }
 
-	// Put harcoded csv names to enclave.json
-	oldEnclave := "./enclave.json"
-	err = utils.Remove(oldEnclave)
-	if err != nil {
-		return "", err
-	}
+	// err = utils.WriteStringToFile("./enclave.json", newEnclaveContent)
+	// if err != nil {
+	// 	return "", err
+	// }
 
-	err = utils.WriteStringToFile("./enclave.json", newEnclaveContent)
-	if err != nil {
-		return "", err
-	}
+	// // Set Simulation Mode by Default
+	// err = os.Setenv("OE_SIMULATION", "1")
+	// if err != nil {
+	// 	err = fmt.Errorf("unable to set env variable %s", "OE_SIMULATION")
+	// 	log.Error(err)
+	// 	return "", err
+	// }
 
-	// Set Simulation Mode by Default
-	err = os.Setenv("OE_SIMULATION", "1")
-	if err != nil {
-		err = fmt.Errorf("unable to set env variable %s", "OE_SIMULATION")
-		log.Error(err)
-		return "", err
-	}
-
-	mainRunCmd := exec.Command("ego", "run", "main")
-	output, err := utils.RunCmd(mainRunCmd)
-	if err != nil {
-		return "", err
-	}
-	filterIntelPrompts(output)
-	output = filterResults(output)
-	te.Result = output
-	return output, nil
+	// mainRunCmd := exec.Command("ego", "run", "main")
+	// output, err := utils.RunCmd(mainRunCmd)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// filterIntelPrompts(output)
+	// output = filterResults(output)
+	// te.Result = output
+	// return output, nil
+	return nil
 }
 
 func (te *TransformationEvent) Status() EventStatus {
@@ -229,17 +234,19 @@ func NewSendDestinationEvent(collab *collaboration.Collaboration, ref address.Ad
 	return destEvent, nil
 }
 
-func (de *DestinationEvent) Run() (string, error) {
+func (de *DestinationEvent) Run() error {
 	outputPath := de.OutputLocation
 	outputPath = outputPath + "/results.txt"
 
-	output, ok := de.ResultStore.Store[de.parentTransformationRef]
-	if !ok {
+	//output, ok := de.ResultStore.Store[de.parentTransformationRef]
+	output, err := AskForResult(string(de.parentTransformationRef))
+	if err != nil {
 		err := fmt.Errorf("result not found for transformaton %s in result store", de.parentTransformationRef)
-		return "", err
+		log.Error(err)
+		return err
 	}
 	utils.WriteStringToFile(outputPath, output)
-	return "", nil
+	return nil
 }
 
 // This function returns the status of the destination event

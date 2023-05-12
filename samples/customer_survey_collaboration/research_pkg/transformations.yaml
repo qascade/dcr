@@ -1,0 +1,19 @@
+collaborator: Research
+transformations: 
+  - name: private_total_customers # /Research/tranformation/private_total_customers
+    type: go_code
+    app_location: ./go_app
+    unique_id: EMAIL
+    from: 
+      - name: table1
+        ref: /Airline/source/Airline_customers 
+        location_tag: csvLocation1
+      - name: table2
+        ref: /Media/source/Media_customers 
+        location_tag: csvLocation2
+    noise_parameters: 
+      - noiseType
+      - epsilon 
+      - maxPartitionsPerUser
+    destination_owners_allowed: # who is allowed to send its sources for this transformation
+      - Media
