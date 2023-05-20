@@ -1,7 +1,7 @@
 ## Related Issue
   - Info about Issue or bug
 
-Closes: #[49]
+Closes: #[issue_no]
 
 ### Describe the changes you've made
 few code changes are done
