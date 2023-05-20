@@ -4,7 +4,7 @@ This documents have basic guidelines that are to followed during the GSSoC'23.
 
 Please make sure to go through the Spec Docs and the introductory video before starting on any issue. Both the links are present on the [Readme](/README.md)
 
-I (@qascade) will personally mentor/guide you through the PR if you chose any of the hard tasks. 
+I (@qascade) will personally mentor/guide you through the PR if you chose any of the hard tasks.😄
 
 Each of the following guidelines are subject to change/bend on the discretion of code owners only. 
 
