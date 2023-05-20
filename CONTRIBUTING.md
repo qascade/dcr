@@ -14,6 +14,7 @@ This Repo will incorporate all the recommendations of [effective go doc](https:/
 There are a few basic ground-rules for contributors:
 
 1. Non-main branches should be used for ongoing work.
+2. Make sure you use Linux or WSL to contribute to this Project. You won't be able to contribute to this project on a Windows Host.
 3. **Pull requests** must pass all the workflows and should have atleast one approval before merging into **main**. 
     - Workflows (non-exhaustive) includes Code Linters, Testers, PR Linters, PR Commit Linters, Issue/PR Template Linters, etc. 
 3. Each PR has to be atomic. No additional code/feature is to be added/modified or removed unless in the scope of the PR title. `tests` are exempted from this rule unless the PR specifically have `test:*` as title.
