@@ -1,4 +1,4 @@
-# DCR Pull Request Guidelines
+# DCR Contributing Guidelines
 
 ## Code Style
 
