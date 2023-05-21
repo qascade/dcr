@@ -51,3 +51,9 @@ Links:
 3. https://confidentialcomputing.io
 4. https://differentialprivacy.org 
 
+## Contributors
+
+<p align="center"><a href="https://github.com/qascade/dcr/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=qascade/dcr" />
+</a>
+</p>
