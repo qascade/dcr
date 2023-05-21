@@ -37,6 +37,10 @@ There are a few basic ground-rules for contributors:
     - doc 
     - collaboration
     - event
+    - logger
+    - error
+    - dp
+    - intelsgx
 
 ### Example PR Titles: 
 PR subject must not start with Capital Letters. 
