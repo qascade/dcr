@@ -11,20 +11,22 @@ Each of the following guidelines are subject to change/bend on the discretion of
 ## For Beginners:
 
 1. Some References to get familiar with Go :
-       a. https://gobyexample.com/
-       b. [Effective Go doc](https://go.dev/doc/effective_go)
-       c. [learn TDD with Go](https://quii.gitbook.io/learn-go-with-tests/)
-       d. debugging with delve: https://youtu.be/a1SneuI65O0
-       e. Testing All the things playlist: https://www.youtube.com/playlist?list=PLtFquUj7IL8VpSL98BTvl3lnD8HS4NGlA
+    - [Go By Examples](https://gobyexample.com/)
+    - [Effective Go doc](https://go.dev/doc/effective_go)
+    - [learn TDD with Go](https://quii.gitbook.io/learn-go-with-tests/)
+    - [Debugging with delve](https://youtu.be/a1SneuI65O0_)
+    - [Testing All the things playlist](https://www.youtube.com/playlist?list=PLtFquUj7IL8VpSL98BTvl3lnD8HS4NGlA)
+       
 2. YAML Ref: https://github.com/qascade/YAML-Notes 
 3. To Learn Git: 
-       a. Missing Sem MIT Version Control: https://youtu.be/2sjqTHE0zok 
-       b. https://ohshitgit.com
-       c. How to become git experts: https://youtu.be/hZS96dwKvt0
-       e. Git Internals (optional): https://youtu.be/lG90LZotrpo 
+    - Missing Sem MIT Version Control: https://youtu.be/2sjqTHE0zok 
+    - https://ohshitgit.com
+    - How to become git experts: https://youtu.be/hZS96dwKvt0
+    - Git Internals (optional): https://youtu.be/lG90LZotrpo 
+
 Pick up a beginner-friendly project and start contributing. Make sure to read all the guidelines as well as the spec docs of the project. You can start with the issues related to theory stuff well, if you are interested, which I highly encourage you to do. Mostly of them are under `medium/hard` category.  
 
-Don't forget [giybf](https://giybf.com)
+Don't forget [giybf](https://giybf.com) 😁
 
 ## Guidelines: 
 
@@ -40,5 +42,5 @@ In general, docs are to updated according the context of PR Title.
 
 Looking forward to some meaningful contributions and collaborations. 
 
-Wishing you the Best of Luck!
+Wishing you the Best of Luck!!🚀
 Shubh Karman Singh 
