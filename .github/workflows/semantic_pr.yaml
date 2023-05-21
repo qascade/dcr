@@ -41,7 +41,6 @@ jobs:
             destination 
             service 
             address
-            doc 
             collaboration
             event
           # Configure that a scope must always be provided.
