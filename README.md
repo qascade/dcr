@@ -24,9 +24,9 @@ NOTE: This project is hosted under [GSSoC'23](https://gssoc.girlscript.tech/). P
 
 To Run an example Data Clean Room Scenario.  
 1. This framework will not work on Windows. Make sure you have a linux machine installed. 
-1. Make sure you have [Intel-SGX](https://github.com/intel/linux-sgx-driver) SDK installed. 
-2. Make sure you have [Go](https://go.dev/) 1.20+ installed. 
-3. Make sure you have [E-Go](https://github.com/edgelesssys/ego) Compiler installed on your PC's
+2. (Optional) Install [Intel-SGX](https://github.com/intel/linux-sgx-driver) SDK 
+3. Make sure you have [Go](https://go.dev/) 1.20+ installed. 
+4. Make sure you have [E-Go](https://github.com/edgelesssys/ego) Compiler installed on your PC's
 
 You can see the sample collaboration package in samples/init_collaboration. You can also look at some sample packages under construction along with their graph images in samples/test_graph
 
