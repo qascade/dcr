@@ -27,6 +27,31 @@ There are a few basic ground-rules for contributors:
 9. Any addition of third party dependency is to justified during Code Review. 
 10. We don't mind force pushes as long as there are no additional diffs getting introduced, that are not in the scope of the PR. 
 
+## PR Title Scopes Allowed: 
+    - config
+    - source 
+    - transformation 
+    - destination 
+    - service 
+    - address
+    - doc 
+    - collaboration
+    - event
+    - logger
+    - error
+    - dp
+    - intelsgx
+
+### Example PR Titles: 
+PR subject must not start with Capital Letters. 
+1. Normal PR Titles: 
+    - ci: propose an automated way to generate changelogs 
+    - refactor: migrate the ego-server code from different repo to dcr
+2. Breaking Change: 
+    - feat!: create a collaboration.yaml
+3. Scoped Title: 
+    - feat(config): enable use of relative addresses in config yaml
+
 ### Releases
 Declaring formal releases remains the prerogative of the project maintainer. First Release yet to be done. 
 

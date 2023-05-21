@@ -16,7 +16,7 @@ This Repo follows following [Contributing Guidelines](https://github.com/qascade
 NOTE: This project is hosted under [GSSoC'23](https://gssoc.girlscript.tech/). Please go through [GSSoc_CONTRIBUTING.md](/GSSoC_GUIDELINES.md) before moving on the any issues. You can ask any queries on discord channel or Discussion Board mentioned. 
 
 ## NOTE: 
-1. As of now this framework is only able to show a Proof of Concept for the architecture described in the spec. 
+1. As of now this framework is only able to show a Proof of Concept for the architecture described in the spec. This framework will be used in a paper that I will be publishing soon. The paper will try to formalise data clean rooms. So, any thing that deviates this project from realising the paper is not in the scope of this project.
 2. Current PoC only shows an example of three collaborators, out of which two provide sources and one provides the transformation. 
 3. Currently only Confidential GoApps are supported for transformations.
 4. The Code is not production ready and does not partake any security measures other than access control and differential privacy. 
@@ -24,9 +24,9 @@ NOTE: This project is hosted under [GSSoC'23](https://gssoc.girlscript.tech/). P
 
 To Run an example Data Clean Room Scenario.  
 1. This framework will not work on Windows. Make sure you have a linux machine installed. 
-1. Make sure you have [Intel-SGX](https://github.com/intel/linux-sgx-driver) SDK installed. 
-2. Make sure you have [Go](https://go.dev/) 1.20+ installed. 
-3. Make sure you have [E-Go](https://github.com/edgelesssys/ego) Compiler installed on your PC's
+2. (Optional) Install [Intel-SGX](https://github.com/intel/linux-sgx-driver) SDK 
+3. Make sure you have [Go](https://go.dev/) 1.20+ installed. 
+4. Make sure you have [E-Go](https://github.com/edgelesssys/ego) Compiler installed on your PC's
 
 You can see the sample collaboration package in samples/init_collaboration. You can also look at some sample packages under construction along with their graph images in samples/test_graph
 
