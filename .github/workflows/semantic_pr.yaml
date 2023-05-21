@@ -36,6 +36,8 @@ jobs:
             ci
           # Configure which scopes are allowed (newline-delimited).
           # These are regex patterns auto-wrapped in `^ $`.
+          # Configure that a scope must always be provided.
+          requireScope: false          
           scopes: |
             config
             source
@@ -47,8 +49,6 @@ jobs:
             event
             logger
             error
-          # Configure that a scope must always be provided.
-          requireScope: false
           # Configure which scopes are disallowed in PR titles (newline-delimited).
           # For instance by setting the value below, `chore(release): ...` (lowercase)
           # and `ci(e2e,release): ...` (unknown scope) will be rejected.
@@ -62,11 +62,6 @@ jobs:
           # If `subjectPattern` is configured, you can use this property to override
           # the default error message that is shown when the pattern doesn't match.
           # The variables `subject` and `title` can be used within the message.
-          wip: true
-          # When using "Squash and merge" on a PR with only one commit, GitHub
-          # will suggest using that commit message instead of the PR title for the
-          # merge commit, and it's easy to commit this by mistake. Enable this option
-          # to also validate the commit message for one commit PRs.
           subjectPatternError: |
             The subject "{subject}" found in the pull request title "{title}"
             didn't match the configured pattern. Please ensure that the subject
