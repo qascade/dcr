@@ -25,7 +25,8 @@ func UnmarshalStrict(in []byte, out interface{}) (err error) {
 func RunCmd(cmd *exec.Cmd) (string, error) {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("unable to capture output for command:%s", err)
+		log.Error(err)
+		return "", fmt.Errorf("unable to capture output for command:%s err: %s", cmd.String(), err)
 	}
 	//log.Infof("Output of cmd %s: %s", cmd.String(), output)
 	return string(output), err
@@ -79,7 +80,6 @@ func FileExists(filePath string) bool {
 }
 
 func WriteStringToFile(filePath string, content string) error {
-	os.Getwd()
 	newFile, err := os.Create(filePath)
 
 	if err != nil {
