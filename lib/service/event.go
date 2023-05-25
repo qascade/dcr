@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -137,12 +138,6 @@ func (te *TransformationEvent) Run() (string, error) {
 		return "", err
 	}
 
-	signCmd := exec.Command("ego", "sign", "main")
-	_, err = utils.RunCmd(signCmd)
-	if err != nil {
-		return "", err
-	}
-
 	// Put harcoded csv names to enclave.json
 	oldEnclave := "./enclave.json"
 	err = utils.Remove(oldEnclave)
@@ -155,6 +150,12 @@ func (te *TransformationEvent) Run() (string, error) {
 		return "", err
 	}
 
+	signCmd := exec.Command("ego", "sign", "main")
+	_, err = utils.RunCmd(signCmd)
+	if err != nil {
+		return "", err
+	}
+
 	// Set Simulation Mode by Default
 	err = os.Setenv("OE_SIMULATION", "1")
 	if err != nil {
@@ -163,6 +164,7 @@ func (te *TransformationEvent) Run() (string, error) {
 		return "", err
 	}
 
+	log.Info("Running the Transformation!!")
 	mainRunCmd := exec.Command("ego", "run", "main")
 	output, err := utils.RunCmd(mainRunCmd)
 	if err != nil {
@@ -171,7 +173,39 @@ func (te *TransformationEvent) Run() (string, error) {
 	filterIntelPrompts(output)
 	output = filterResults(output)
 	te.Result = output
+
+	err = te.Cleanup()
+	if err != nil {
+		return output, err
+	}
+
 	return output, nil
+}
+
+func (te *TransformationEvent) Cleanup() error {
+	goAppPath := te.goAppLocation
+	log.Info("Initiating Cleanup")
+	err := filepath.Walk(goAppPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && (filepath.Ext(path) == ".go" || filepath.Ext(path) == ".pem" || filepath.Ext(path) == ".csv" || info.Name() == "enclave.json" || info.Name() == "main") {
+			err := os.Remove(path)
+			if err != nil {
+				return err
+			}
+			log.Infof("Removed file: %s\n", path)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		err = fmt.Errorf("err unable to perform cleanup")
+		log.Error(err)
+		return err
+	}
+	return nil
 }
 
 func (te *TransformationEvent) Status() EventStatus {

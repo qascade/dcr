@@ -1,5 +1,8 @@
 package service
 
+// Have to disable this test because there is no CI on Github actions to test this.
+// Uncomment to test locally.
+
 import (
 	// "github.com/stretchr/testify/require"
 	"testing"
