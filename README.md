@@ -41,7 +41,7 @@ make build
 
 2. 🏃🏻‍♀️ Run the demonstration 
 ```bash
-./dcr run --pkgpath samples/init_collaboration
+./bin/dcr run --pkgpath samples/init_collaboration
 ```
 
 Links: 
