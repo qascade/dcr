@@ -16,6 +16,14 @@
         {
             "source": "./test2.csv",
             "target": "./test2.csv"
+        },
+        {
+            "source": "./airline_customers.csv",
+            "target": "./airline_customers.csv"
+        },
+        {
+            "source": "./media_customers.csv",
+            "target": "./media_customers.csv"
         }
     ]
  }
