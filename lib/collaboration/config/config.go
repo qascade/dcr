@@ -146,7 +146,7 @@ func (c *CollaborationConfig) parseSourceSpec(path string) (*SourceGroupSpec, er
 }
 
 func (c *CollaborationConfig) parseTransformationSpec(path string) (*TransformationGroupSpec, error) {
-	transformationYamlPath := path + "/transformations.yaml"
+	transformationYamlPath := filepath.Join(path, "transformations.yaml")
 	transformationSpecB, err := os.ReadFile(transformationYamlPath)
 	if err != nil {
 		// If the file is not present, then return nil
@@ -166,13 +166,13 @@ func (c *CollaborationConfig) parseTransformationSpec(path string) (*Transformat
 		return nil, fmt.Errorf("unable to unmarshal to TransformationGroupSpec %s", transformationYamlPath)
 	}
 	for i, tSpec := range tResult.Transformations {
-		tResult.Transformations[i].AppLocation = filepath.Join(path, tSpec.AppLocation)
+		tResult.Transformations[i].AppLocation = resolveRelativeAddress(path, tSpec.AppLocation)
 	}
 	return &tResult, nil
 }
 
 func (c *CollaborationConfig) parseDestinationSpec(path string) (*DestinationGroupSpec, error) {
-	destinationYamlPath := path + "/destinations.yaml"
+	destinationYamlPath := filepath.Join(path, "destinations.yaml")
 	destinationSpecB, err := os.ReadFile(destinationYamlPath)
 	if err != nil {
 		// If the file is not present, then return nil
@@ -191,7 +191,19 @@ func (c *CollaborationConfig) parseDestinationSpec(path string) (*DestinationGro
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal to DestinationGroupSpec, %s", destinationYamlPath)
 	}
+	for i, dSpec := range dResult.Destinations {
+		dResult.Destinations[i].SomeField = resolveRelativeAddress(path, dSpec.SomeField)
+		// Modify other fields as necessary
+	}
 	return &dResult, nil
+}
+
+func resolveRelativeAddress(basePath, address string) string {
+	if strings.HasPrefix(address, "/") {
+		// Absolute address, no need for resolution
+		return address
+	}
+	return filepath.Join(basePath, address)
 }
 
 func ParseSpec(yamlBytes []byte, specType SpecType) (Spec, error) {
